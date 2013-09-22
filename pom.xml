@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.github.snowdream.android.net</groupId>
-	<artifactId>android-downloader-parent</artifactId>
+	<artifactId>android-downloader-all-parent</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>android-downloader - Parent</name>
