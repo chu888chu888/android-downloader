@@ -21,37 +21,13 @@
 			<artifactId>android</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.squareup.okhttp</groupId>
-			<artifactId>okhttp</artifactId>
-			<version>1.2.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.github.snowdream.android.util.concurrent</groupId>
-			<artifactId>multithread</artifactId>
-			<version>0.0.4</version>
-		</dependency>
-		<dependency>
-			<groupId>com.github.snowdream.android.util</groupId>
-			<artifactId>log</artifactId>
-			<version>0.0.4</version>
-			<dependency>
-				<groupId>com.squareup.okhttp</groupId>
-				<artifactId>okhttp</artifactId>
-				<version>1.2.1</version>
-			</dependency>
-			<dependency>
-				<groupId>com.github.snowdream.android.util.concurrent</groupId>
-				<artifactId>multithread</artifactId>
-				<version>0.0.3</version>
-			</dependency>
-			<dependency>
-				<groupId>com.github.snowdream.android.util</groupId>
-				<artifactId>log</artifactId>
-				<version>0.0.4</version>
-			</dependency>
-		</dependency>
 
+		<dependency>
+			<groupId>com.github.snowdream.android.net</groupId>
+			<artifactId>android-downloader</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<type>apklib</type>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>${project.artifactId}</finalName>

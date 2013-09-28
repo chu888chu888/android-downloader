@@ -16,63 +16,34 @@
 
 package com.github.snowdream.android.net;
 
-import android.R.integer;
 
 /**
- * The download task
- * 
  * @author snowdream <yanghui1986527@gmail.com>
  * @date Sep 29, 2013
  * @version v1.0
  */
-public class DownloadTask {
-    /**
-     *  id
-     */
-    private int id = 0;
+public class DownloadException extends Exception {
+    private int code = UNKNOWN;
 
-    /**
-     *  url
-     */
-    private String url = "";
+    /** serialVersionUID **/
+    private static final long serialVersionUID = -3804737584048978515L;
 
-    /**
-     * name
-     */
-    private String name = "";
+    public static final int UNKNOWN = 0;
 
-    /**
-     *  total size
-     */
-    private long size = 0;
+    public static final int DOWNLOAD_TASK_NOT_VALID = 1;
 
-    /**
-     * download status
-     */
-    private int status = DownloadStatus.STATUS_PENDING;
+    public DownloadException() {
+    }
 
-    /**
-     * the time of start downloading
-     */
-    private long startTime = 0;
+    public DownloadException(int code) {
+        this.code = code;
+    }
 
-    /**
-     * the time of finish downloading
-     */
-    private long finishTime = 0;
+    public int getCode() {
+        return code;
+    }
 
-    /**
-     * type
-     */
-    private int type = DownloadType.TYPE_UNKNOWN;
-
-    /**
-     * mimetype
-     */
-    private String mimeType = "";
-    
-    /**
-     * the save path on the sdcard
-     */
-    private String path = "";
+    public void setCode(int code) {
+        this.code = code;
+    }
 }

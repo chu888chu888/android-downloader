@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (C) 2013 Snowdream Mobile
  *
- * Licensed under the Apache License, Version 2.0 (the "License"){};
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -16,29 +16,24 @@
 
 package com.github.snowdream.android.net;
 
-import java.util.List;
+import android.app.Activity;
+import android.os.Bundle;
 
 /**
+ * 
+ *
  * @author snowdream <yanghui1986527@gmail.com>
  * @date Sep 29, 2013
  * @version v1.0
  */
-public class DownloadManager {
-    public static void add(DownloadTask task, DownloadListener listener){};
-
-    public static void add(List<DownloadTask> tasks, DownloadListener listener){};
-
-    public static void start(){};
-
-    public static void start(DownloadTask task){};
-
-    public static void pause(DownloadTask task){};
-    
-    public static void delete(DownloadTask task){};
-    
-    public static void deleteforever(DownloadTask task){};
-    
-    public static void cancel(){};
-
-    public static void cancel(DownloadTask task){};
+public class HelloAndroidActivity extends Activity{
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        setContentView(R.layout.activity_main);
+        
+        
+        
+    }
 }
