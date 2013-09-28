@@ -22,7 +22,11 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
-
+	<dependency>
+		<groupId>com.squareup.okhttp</groupId>
+		<artifactId>okhttp</artifactId>
+		<version>1.2.1</version>
+	</dependency>
 	<build>
 		<finalName>${project.artifactId}</finalName>
 
@@ -117,8 +121,10 @@
 									<keypass>${sign.keypass}</keypass>
 									<verbose>false</verbose>
 									<arguments>
-										<argument>-sigalg</argument><argument>MD5withRSA</argument>
-										<argument>-digestalg</argument><argument>SHA1</argument>
+										<argument>-sigalg</argument>
+										<argument>MD5withRSA</argument>
+										<argument>-digestalg</argument>
+										<argument>SHA1</argument>
 									</arguments>
 								</configuration>
 							</execution>
