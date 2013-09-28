@@ -21,12 +21,9 @@
 			<artifactId>android</artifactId>
 			<scope>provided</scope>
 		</dependency>
+
 	</dependencies>
-	<dependency>
-		<groupId>com.squareup.okhttp</groupId>
-		<artifactId>okhttp</artifactId>
-		<version>1.2.1</version>
-	</dependency>
+
 	<build>
 		<finalName>${project.artifactId}</finalName>
 
