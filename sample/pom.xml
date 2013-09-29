@@ -10,7 +10,7 @@
 
 	<modules>
 		<module>downloader</module>
-		<module>downloader-it</module>
+	<!-- <module>downloader-it</module> -->
 	</modules>
 
 	<properties>

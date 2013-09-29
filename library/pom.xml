@@ -85,7 +85,7 @@
 			</activation>
 			<modules>
 				<module>android-downloader</module>
-				<module>android-downloader-it</module>
+	<!-- <module>android-downloader-it</module> -->
 			</modules>
 		</profile>
 		<profile>
@@ -108,6 +108,6 @@
 
   <modules>
     <module>android-downloader</module>
-    <module>android-downloader-it</module>
+	<!-- <module>android-downloader-it</module> -->
   </modules>
 </project>
