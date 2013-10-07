@@ -16,6 +16,13 @@
 
 package com.github.snowdream.android.net;
 
+import android.content.Context;
+
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 /**
  * The download task
  * 
@@ -23,60 +30,80 @@ package com.github.snowdream.android.net;
  * @date Sep 29, 2013
  * @version v1.0
  */
+@DatabaseTable(tableName = "downloadtask")
 public class DownloadTask {
     /**
      * id
      */
+    @DatabaseField(generatedId = true, canBeNull = false)
     private int id = 0;
 
     /**
      * url
      */
+    @DatabaseField(canBeNull = false)
     private String url = "";
 
     /**
      * name
      */
+    @DatabaseField
     private String name = "";
 
     /**
      * total size
      */
+    @DatabaseField
     private long size = 0;
 
     /**
      * download status
      */
+    @DatabaseField
     private int status = DownloadStatus.STATUS_PENDING;
 
     /**
      * the time of start downloading
      */
+    @DatabaseField
     private long startTime = 0;
 
     /**
      * the time of finish downloading
      */
+    @DatabaseField
     private long finishTime = 0;
 
     /**
      * type
      */
+    @DatabaseField
     private int type = DownloadType.TYPE_UNKNOWN;
 
     /**
      * mimetype
      */
+    @DatabaseField
     private String mimeType = "";
 
     /**
      * the save path on the sdcard
      */
+    @DatabaseField(canBeNull = false)
     private String path = "";
 
+    @DatabaseField(persisted = false)
     private AsycDownloadTask task = null;
 
-    public DownloadTask() {
+    @DatabaseField(persisted = false)
+    private Context context = null;
+
+    @SuppressWarnings("unused")
+    private DownloadTask() {
+    };
+
+    public DownloadTask(Context context) {
+        this.context = context;
     };
 
     public int getId() {
@@ -159,10 +186,34 @@ public class DownloadTask {
         this.path = path;
     }
 
+    public Context getContext() {
+        return context;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
     public void start(DownloadListener listener) {
-        if(task == null){
+        if (task == null) {
             task = new AsycDownloadTask(listener);
         }
         task.execute(this);
+    }
+
+    @Override
+    public int hashCode() {
+        return url.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
     };
+    
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);  
+    }
+    
 }
