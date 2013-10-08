@@ -1,10 +1,13 @@
 
 package com.github.snowdream.android.net;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.webkit.URLUtil;
 
+import com.github.snowdream.android.net.dao.ISql;
+import com.github.snowdream.android.net.dao.ISqlImpl;
 import com.github.snowdream.android.util.Log;
 import com.github.snowdream.android.util.concurrent.AsyncTask;
 
@@ -18,11 +21,13 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.sql.SQLException;
 
 public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadTask> {
     private static final InternalHandler sHandler = new InternalHandler();
 
     private static final int MESSAGE_POST_ERROR = 0x1;
+    private static final int MESSAGE_POST_SUCCESS = 0x2;
 
     public AsycDownloadTask(DownloadListener<Integer, DownloadTask> listener) {
         super(listener);
@@ -37,9 +42,11 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
             if (!isCancelled()) {
                 sHandler.obtainMessage(
                         MESSAGE_POST_ERROR,
-                        new AsyncTaskResult(this,
+                        new AsyncTaskResult(this, null,
                                 DownloadException.DOWNLOAD_TASK_NOT_VALID)).sendToTarget();
             }
+
+            return null;
         }
 
         DownloadTask task = tasks[0];
@@ -48,11 +55,11 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
             if (!isCancelled()) {
                 sHandler.obtainMessage(
                         MESSAGE_POST_ERROR,
-                        new AsyncTaskResult(this,
+                        new AsyncTaskResult(this, task,
                                 DownloadException.DOWNLOAD_TASK_NOT_VALID)).sendToTarget();
             }
 
-            return task;
+            return null;
         }
 
         String path = task.getPath();
@@ -64,26 +71,33 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
 
         try {
             long range = 0;
-            long size = 0;
+            long size = task.getSize();
             long curSize = 0;
+            String contentType = "";
+
+            File dir = file.getParentFile();
+
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
 
             if (!file.exists()) {
                 file.createNewFile();
             }
 
+            range = file.length();
+            curSize = range;
+
             if (!file.canWrite()) {
                 if (!isCancelled()) {
                     sHandler.obtainMessage(
                             MESSAGE_POST_ERROR,
-                            new AsyncTaskResult(this,
+                            new AsyncTaskResult(this, task,
                                     DownloadException.DOWNLOAD_TASK_NOT_VALID)).sendToTarget();
                 }
 
-                return task;
+                return null;
             }
-
-            range = file.length();
-            curSize = range;
 
             URL url = new URL(task.getUrl());
             connection = (HttpURLConnection) url.openConnection();
@@ -95,9 +109,23 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                 connection.setRequestProperty("Range", "bytes=" + range +
                         "-");
             }
-            String acceptRanges = connection.getHeaderField("Accept-Ranges");
+            // String acceptRanges = connection.getHeaderField("Accept-Ranges");
 
+            
             size = connection.getContentLength();
+            contentType = connection.getContentType();
+
+            if (task.getSize() != 0 && file.length() == task.getSize()) {
+                Log.i("The file has already been downloaded!");
+                return task;
+            }
+
+            if (range == 0) {
+                task.setSize(size);
+                task.setStartTime(System.currentTimeMillis());
+                task.setMimeType(contentType);
+                SaveDownloadTask(task, task.getStatus());
+            }
 
             out = new RandomAccessFile(file, "rw");
             out.seek(range);
@@ -108,9 +136,9 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
             int nRead = 0;
             while ((nRead = in.read(buffer, 0, 1024)) > 0)
             {
-                /*
-                 * while(paused) { Thread.sleep(500); }
-                 */
+                while (task.getStatus() == DownloadStatus.STATUS_PAUSED) {
+                    Thread.sleep(500);
+                }
 
                 out.write(buffer, 0, nRead);
 
@@ -119,14 +147,58 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
 
                 if (isCancelled())
                     break;
+                
+                if ((task.getStatus() != DownloadStatus.STATUS_RUNNING) && (task.getStatus() != DownloadStatus.STATUS_PAUSED)) {
+                    break;
+                }
+            }
+            
+            if (file.length() != 0 && file.length() == size) {
+                if (!isCancelled()) {
+                    sHandler.obtainMessage(
+                            MESSAGE_POST_SUCCESS,
+                            new AsyncTaskResult(this, task, -1)).sendToTarget();
+                }
             }
         } catch (MalformedURLException e) {
+            if (!isCancelled()) {
+                sHandler.obtainMessage(
+                        MESSAGE_POST_ERROR,
+                        new AsyncTaskResult(this, task,
+                                DownloadException.DOWNLOAD_TASK_NOT_VALID)).sendToTarget();
+            }
             e.printStackTrace();
         } catch (ProtocolException e) {
+            if (!isCancelled()) {
+                sHandler.obtainMessage(
+                        MESSAGE_POST_ERROR,
+                        new AsyncTaskResult(this, task,
+                                DownloadException.DOWNLOAD_TASK_NOT_VALID)).sendToTarget();
+            }
             e.printStackTrace();
         } catch (FileNotFoundException e) {
+            if (!isCancelled()) {
+                sHandler.obtainMessage(
+                        MESSAGE_POST_ERROR,
+                        new AsyncTaskResult(this, task,
+                                DownloadException.DOWNLOAD_TASK_NOT_VALID)).sendToTarget();
+            }
             e.printStackTrace();
         } catch (IOException e) {
+            if (!isCancelled()) {
+                sHandler.obtainMessage(
+                        MESSAGE_POST_ERROR,
+                        new AsyncTaskResult(this, task,
+                                DownloadException.DOWNLOAD_TASK_NOT_VALID)).sendToTarget();
+            }
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            if (!isCancelled()) {
+                sHandler.obtainMessage(
+                        MESSAGE_POST_ERROR,
+                        new AsyncTaskResult(this, task,
+                                DownloadException.DOWNLOAD_TASK_NOT_VALID)).sendToTarget();
+            }
             e.printStackTrace();
         } finally {
             try {
@@ -153,11 +225,50 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
      * 
      * @param mData
      */
-    private void OnError(Integer code) {
+    private void OnError(DownloadTask task, Integer code) {
+        SaveDownloadTask(task, DownloadStatus.STATUS_FAILED);
+
         if (listener != null) {
             listener.onError(new DownloadException(code));
         }
+    }
 
+    /**
+     * finish
+     * 
+     * @param mData
+     */
+    private void OnFinish(DownloadTask task) {
+        SaveDownloadTask(task, DownloadStatus.STATUS_FINISHED);
+
+        if (listener != null) {
+            listener.onSuccess(task);
+        }
+    } 
+    
+    
+    /**
+     * Update the status of the DownloadTask,and save it to the sqlite
+     * 
+     * @param task
+     * @param status
+     */
+    private void SaveDownloadTask(DownloadTask task, int status) {
+        Context context = task.getContext();
+
+        if (context == null) {
+            return;
+        }
+
+        task.setStatus(status);
+
+        ISql iSql = new ISqlImpl(context);
+
+        try {
+            iSql.updateDownloadTask(task);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private static class InternalHandler extends Handler {
@@ -166,7 +277,10 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
             AsyncTaskResult result = (AsyncTaskResult) msg.obj;
             switch (msg.what) {
                 case MESSAGE_POST_ERROR:
-                    ((AsycDownloadTask) result.mTask).OnError(result.mData[0]);
+                    ((AsycDownloadTask) result.mTask).OnError(result.mDownloadTask, result.mData);
+                    break;
+                case MESSAGE_POST_SUCCESS:
+                    ((AsycDownloadTask) result.mTask).OnFinish(result.mDownloadTask);
                     break;
                 default:
                     break;
@@ -177,12 +291,14 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
     private static class AsyncTaskResult {
         @SuppressWarnings("rawtypes")
         final AsyncTask mTask;
-        final Integer[] mData;
+        final Integer mData;
+        final DownloadTask mDownloadTask;
 
         AsyncTaskResult(@SuppressWarnings("rawtypes")
-        AsyncTask task, Integer... data) {
+        AsyncTask task, DownloadTask downloadtask, Integer data) {
             mTask = task;
             mData = data;
+            mDownloadTask = downloadtask;
         }
     }
 }

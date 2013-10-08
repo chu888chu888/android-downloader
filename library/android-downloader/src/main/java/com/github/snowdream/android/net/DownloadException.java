@@ -30,7 +30,15 @@ public class DownloadException extends Exception {
 
     public static final int UNKNOWN = 0;
 
+    /**
+     * The task is not valid.
+     */
     public static final int DOWNLOAD_TASK_NOT_VALID = 1;
+    
+    /**
+     * the operation is not valid.
+     */
+    public static final int OPERATION_NOT_VALID = 10;
 
     public DownloadException() {
     }

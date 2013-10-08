@@ -194,6 +194,14 @@ public class DownloadTask {
         this.context = context;
     }
 
+    /**
+     * Start the Task 
+     * 
+     * @param listener
+     */
+    @SuppressWarnings({
+            "rawtypes", "unchecked"
+    })
     public void start(DownloadListener listener) {
         if (task == null) {
             task = new AsycDownloadTask(listener);
@@ -201,6 +209,18 @@ public class DownloadTask {
         task.execute(this);
     }
 
+    /**
+     * Cancel the Task
+     * 
+     * @param listener
+     */
+    @SuppressWarnings("rawtypes")
+    public void cancel(DownloadListener listener) {
+        if (task != null) {
+            task.cancel(false);
+        }
+    }    
+    
     @Override
     public int hashCode() {
         return url.hashCode();
