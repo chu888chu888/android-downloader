@@ -33,7 +33,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.j256.ormlite</groupId>
-			<artifactId>ormlite-jdbc</artifactId>
+			<artifactId>ormlite-core</artifactId>
 			<version>4.47</version>
 		</dependency>
 		<dependency>
