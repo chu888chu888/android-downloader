@@ -155,6 +155,8 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                     Log.i("HTTP MODE: TRUNKED");
                 }
 
+                //http auto redirection
+                //see: http://www.mkyong.com/java/java-httpurlconnection-follow-redirect-example/
                 boolean redirect = false;
                 boolean success = false;
 
