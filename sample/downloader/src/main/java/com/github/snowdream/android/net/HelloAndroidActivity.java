@@ -36,7 +36,7 @@ public class HelloAndroidActivity extends Activity{
         DownloadTask task = new DownloadTask(this);
         task.setUrl("http://www.appchina.com/market/d/1019394/cop.baidu_0/com.hd.explorer.apk");
         task.setPath("/mnt/sdcard/10120702.apk");
-        
+        DownloadManager.add(task);
         DownloadManager.start(task, new DownloadListener<Integer, DownloadTask>());
     }
 }
