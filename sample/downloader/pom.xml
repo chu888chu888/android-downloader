@@ -26,6 +26,7 @@
 			<groupId>com.github.snowdream.android.net</groupId>
 			<artifactId>android-downloader</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
+			<type>apklib</type>
 		</dependency>
 	</dependencies>
 	<build>

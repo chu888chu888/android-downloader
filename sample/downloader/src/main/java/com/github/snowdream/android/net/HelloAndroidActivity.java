@@ -33,8 +33,8 @@ public class HelloAndroidActivity extends Activity{
         
         setContentView(R.layout.activity_main);
         
-        DownloadTask task = new DownloadTask();
-        task.setUrl("http://down.angeeks.com/c/d2/d10120/10120702.apk");
+        DownloadTask task = new DownloadTask(this);
+        task.setUrl("http://www.appchina.com/market/d/1019394/cop.baidu_0/com.hd.explorer.apk");
         task.setPath("/mnt/sdcard/10120702.apk");
         
         DownloadManager.start(task, new DownloadListener<Integer, DownloadTask>());

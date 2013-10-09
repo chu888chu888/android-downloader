@@ -26,6 +26,8 @@ import com.github.snowdream.android.util.Log;
 import java.io.File;
 import java.sql.SQLException;
 
+import javax.security.auth.login.LoginException;
+
 /**
  * @author snowdream <yanghui1986527@gmail.com>
  * @date Sep 29, 2013
@@ -33,12 +35,14 @@ import java.sql.SQLException;
  */
 public class DownloadManager {
     /**
-     * Add Task 
+     * Add Task
      * 
      * @param task
-     * @return  
+     * @return
      */
     public static boolean add(DownloadTask task) {
+        Log.i("Add Task");
+        
         boolean ret = false;
 
         if (task == null) {
@@ -53,8 +57,17 @@ public class DownloadManager {
 
         ISql iSql = new ISqlImpl(context);
 
+        DownloadTask temptask = null;
+
         try {
-            iSql.addDownloadTask(task);
+            temptask = iSql.queryDownloadTask(task);
+            
+            if (temptask == null) {
+                iSql.addDownloadTask(task);
+                Log.i("The Task is stored in the sqlite.");
+            }else {
+                Log.i("The Task is already stored in the sqlite.");
+            }
 
             ret = true;
         } catch (SQLException e) {
@@ -79,6 +92,8 @@ public class DownloadManager {
      */
     @SuppressWarnings("rawtypes")
     public static boolean start(DownloadTask task, DownloadListener listener) {
+        Log.i("Start Task");
+        
         boolean ret = false;
 
         if (task == null) {
@@ -128,9 +143,9 @@ public class DownloadManager {
 
     /**
      * Pause Task<BR />
-     * 
-     * if the task status is not DownloadStatus.STATUS_PAUSED or DownloadStatus.STATUS_RUNNING,
-     * then exceptions(DownloadException.OPERATION_NOT_VALID) will be thrown.
+     * if the task status is not DownloadStatus.STATUS_PAUSED or
+     * DownloadStatus.STATUS_RUNNING, then
+     * exceptions(DownloadException.OPERATION_NOT_VALID) will be thrown.
      * 
      * @param task
      * @param listener
@@ -138,12 +153,14 @@ public class DownloadManager {
      */
     @SuppressWarnings("rawtypes")
     public static boolean pause(DownloadTask task, DownloadListener listener) {
+        Log.i("Pause Task");
+        
         boolean ret = false;
 
         if (task == null) {
             return ret;
         }
-        
+
         Context context = task.getContext();
 
         if (context == null) {
@@ -157,7 +174,7 @@ public class DownloadManager {
                 break;
             case DownloadStatus.STATUS_RUNNING:
                 task.setStatus(DownloadStatus.STATUS_PAUSED);
-                
+
                 ISql iSql = new ISqlImpl(context);
 
                 try {
@@ -178,9 +195,9 @@ public class DownloadManager {
 
     /**
      * Resume Task<BR />
-     * 
-     * if the task status is not DownloadStatus.STATUS_PAUSED or DownloadStatus.STATUS_RUNNING,
-     * then errors(DownloadException.OPERATION_NOT_VALID) will be thrown.
+     * if the task status is not DownloadStatus.STATUS_PAUSED or
+     * DownloadStatus.STATUS_RUNNING, then
+     * errors(DownloadException.OPERATION_NOT_VALID) will be thrown.
      * 
      * @param task
      * @param listener
@@ -188,18 +205,20 @@ public class DownloadManager {
      */
     @SuppressWarnings("rawtypes")
     public static boolean resume(DownloadTask task, DownloadListener listener) {
+        Log.i("Resume Task");
+        
         boolean ret = false;
 
         if (task == null) {
             return ret;
         }
-        
+
         Context context = task.getContext();
 
         if (context == null) {
             return ret;
         }
-        
+
         switch (task.getStatus()) {
             case DownloadStatus.STATUS_RUNNING:
                 ret = true;
@@ -207,7 +226,7 @@ public class DownloadManager {
                 break;
             case DownloadStatus.STATUS_PAUSED:
                 task.setStatus(DownloadStatus.STATUS_RUNNING);
-                
+
                 ISql iSql = new ISqlImpl(context);
 
                 try {
@@ -228,9 +247,10 @@ public class DownloadManager {
 
     /**
      * Stop Task<BR />
-     * 
-     * if the task status is not DownloadStatus.STATUS_PAUSED,DownloadStatus.STATUS_STOPPED or DownloadStatus.STATUS_RUNNING,
-     * then exceptions(DownloadException.OPERATION_NOT_VALID) will be thrown.
+     * if the task status is not
+     * DownloadStatus.STATUS_PAUSED,DownloadStatus.STATUS_STOPPED or
+     * DownloadStatus.STATUS_RUNNING, then
+     * exceptions(DownloadException.OPERATION_NOT_VALID) will be thrown.
      * 
      * @param task
      * @param listener
@@ -238,18 +258,20 @@ public class DownloadManager {
      */
     @SuppressWarnings("rawtypes")
     public static boolean stop(DownloadTask task, DownloadListener listener) {
+        Log.i("Stop Task");
+        
         boolean ret = false;
 
         if (task == null) {
             return ret;
         }
-        
+
         Context context = task.getContext();
 
         if (context == null) {
             return ret;
         }
-        
+
         switch (task.getStatus()) {
             case DownloadStatus.STATUS_STOPPED:
                 ret = true;
@@ -258,7 +280,7 @@ public class DownloadManager {
             case DownloadStatus.STATUS_PAUSED:
             case DownloadStatus.STATUS_RUNNING:
                 task.setStatus(DownloadStatus.STATUS_STOPPED);
-                
+
                 ISql iSql = new ISqlImpl(context);
 
                 try {
@@ -279,7 +301,6 @@ public class DownloadManager {
 
     /**
      * Delete Task <BR />
-     * 
      * just set the task status to DownloadStatus.STATUS_DELETED
      * 
      * @param task
@@ -288,12 +309,14 @@ public class DownloadManager {
      */
     @SuppressWarnings("rawtypes")
     public static boolean delete(DownloadTask task, DownloadListener listener) {
+        Log.i("Delete Task");
+        
         boolean ret = false;
 
         if (task == null) {
             return ret;
         }
-        
+
         Context context = task.getContext();
 
         if (context == null) {
@@ -307,7 +330,7 @@ public class DownloadManager {
                 break;
             default:
                 task.setStatus(DownloadStatus.STATUS_DELETED);
-                
+
                 ISql iSql = new ISqlImpl(context);
 
                 try {
@@ -325,7 +348,6 @@ public class DownloadManager {
 
     /**
      * Delete Task <BR />
-     * 
      * delete the task ,and the file of the task too.
      * 
      * @param task
@@ -334,6 +356,8 @@ public class DownloadManager {
      */
     @SuppressWarnings("rawtypes")
     public static boolean deleteforever(DownloadTask task, DownloadListener listener) {
+        Log.i("Delete Task forever");
+        
         boolean ret = false;
 
         if (task == null) {
@@ -357,7 +381,6 @@ public class DownloadManager {
 
     /**
      * Cancel Task <BR />
-     * 
      * like @see {@link DownloadManager#stop(DownloadTask, DownloadListener)} ,
      * but no exceptions will be thrown.
      * 
@@ -367,6 +390,8 @@ public class DownloadManager {
      */
     @SuppressWarnings("rawtypes")
     public static boolean cancel(DownloadTask task, DownloadListener listener) {
+        Log.i("Cancel Task");
+        
         boolean ret = false;
 
         if (task == null) {

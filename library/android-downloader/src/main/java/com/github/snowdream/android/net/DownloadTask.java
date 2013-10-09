@@ -103,6 +103,7 @@ public class DownloadTask {
     };
 
     public DownloadTask(Context context) {
+        super();
         this.context = context;
     };
 

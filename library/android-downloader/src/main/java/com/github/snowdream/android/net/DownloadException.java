@@ -39,6 +39,11 @@ public class DownloadException extends Exception {
      * the operation is not valid.
      */
     public static final int OPERATION_NOT_VALID = 10;
+    
+    /**
+     * The task failed.
+     */
+    public static final int DOWNLOAD_TASK_FAILED = 11;
 
     public DownloadException() {
     }

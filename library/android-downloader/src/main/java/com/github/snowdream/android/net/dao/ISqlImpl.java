@@ -23,6 +23,7 @@ import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
 
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * @author snowdream <yanghui1986527@gmail.com>
@@ -81,6 +82,8 @@ public class ISqlImpl implements ISql {
     }
 
     public DownloadTask queryDownloadTask(DownloadTask task) throws SQLException {
+        List<DownloadTask> tasks = null;
+        
         DownloadTask ttask = null;
 
         if (task == null) {
@@ -89,7 +92,11 @@ public class ISqlImpl implements ISql {
 
         Dao<DownloadTask, Integer> taskDao = getHelper().getTaskDao();
 
-        ttask = taskDao.queryForSameId(task);
+        tasks = taskDao.queryForEq("url", task.getUrl());
+        
+        if (tasks != null && tasks.size() > 0 ) {
+            ttask = tasks.get(0);
+        }
 
         return ttask;
     }
