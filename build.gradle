@@ -1,0 +1,27 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.6.3'
+        classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.6.0'
+    }
+}
+
+def isReleaseBuild() {
+    return version.contains("SNAPSHOT") == false
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+    }
+}
+
+
+
