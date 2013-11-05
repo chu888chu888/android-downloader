@@ -1,5 +1,6 @@
 apply plugin: 'android-library'
 
+archivesBaseName = POM_NAME
 
 dependencies {
     compile 'com.github.snowdream.android.util.concurrent:multithread:0.0.6'
@@ -30,7 +31,9 @@ android {
                     "${android.plugin.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
             classpath = files(variant.javaCompile.classpath.files) + files(ext.androidJar)
             options.links("http://docs.oracle.com/javase/7/docs/api/");
-            options.links("http://d.android.com/reference/");
+            options.linksOffline("http://d.android.com/reference","${android.plugin.sdkDirectory}/docs/reference");
+            options.links("http://ormlite.com/javadoc/ormlite-core/");
+            options.links("http://ormlite.com/javadoc/ormlite-android/");
             exclude '**/BuildConfig.java'
             exclude '**/R.java'
             exclude '**/Log2File.java'
