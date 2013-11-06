@@ -1,7 +1,6 @@
 apply plugin: 'android'
 
 dependencies {
-    compile project(':lib')
 }
 
 android {
