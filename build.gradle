@@ -1,5 +1,6 @@
 buildscript {
     repositories {
+        mavenLocal()
         mavenCentral()
     }
 
@@ -17,6 +18,7 @@ allprojects {
     version = POM_VERSION
 
     repositories {
+        mavenLocal()
         mavenCentral()
     }
 
