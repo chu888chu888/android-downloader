@@ -3,8 +3,9 @@ apply plugin: 'idea'
 apply from: '../config/android.gradle'
 //apply from: '../config/sign.gradle'
 apply from: '../config/maven_push.gradle'
+apply from: '../config/androidannotations.gradle'
 
 dependencies {
     compile project(':lib')
-    compile 'org.roboguice:roboguice:2.0'
 }
+

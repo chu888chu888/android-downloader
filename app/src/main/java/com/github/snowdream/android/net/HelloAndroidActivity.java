@@ -19,6 +19,8 @@ package com.github.snowdream.android.net;
 import android.app.Activity;
 import android.os.Bundle;
 
+import com.googlecode.androidannotations.annotations.EActivity;
+
 /**
  * 
  *
@@ -26,12 +28,13 @@ import android.os.Bundle;
  * @date Sep 29, 2013
  * @version v1.0
  */
+@EActivity(R.layout.activity_main)
 public class HelloAndroidActivity extends Activity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        setContentView(R.layout.activity_main);
+        //setContentView(R.layout.activity_main);
         
         DownloadTask task = new DownloadTask(this);
         task.setUrl("http://www.appchina.com/market/d/1019394/cop.baidu_0/com.hd.explorer.apk");
