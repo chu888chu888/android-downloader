@@ -1,6 +1,5 @@
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply from: 'android-library.gradle'
-apply from: '../config/license.gradle'
+apply from: '../config/android-library.gradle'
 //apply from: '../config/sign.gradle'
 apply from: '../config/maven_push.gradle'
