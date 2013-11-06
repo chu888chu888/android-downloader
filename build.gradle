@@ -10,10 +10,6 @@ buildscript {
     }
 }
 
-def isReleaseBuild() {
-    return version.contains("SNAPSHOT") == false
-}
-
 allprojects {
     version = POM_VERSION
 
@@ -27,7 +23,6 @@ allprojects {
     }
 }
 
-
 /**
  * Task to generate a gradle wrapper.
  */
@@ -35,3 +30,6 @@ task wrapper(type: Wrapper) {
     gradleVersion = '1.8'
 }
 
+def isReleaseBuild() {
+    return version.contains("SNAPSHOT") == false
+}
