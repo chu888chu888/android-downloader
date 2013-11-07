@@ -22,8 +22,8 @@ import android.os.Bundle;
 import com.github.snowdream.android.app.DownloadListener;
 import com.github.snowdream.android.app.DownloadManager;
 import com.github.snowdream.android.app.DownloadTask;
-import com.googlecode.androidannotations.annotations.EActivity;
 
+import net.simonvt.menudrawer.MenuDrawer;
 /**
  * 
  *
@@ -31,14 +31,19 @@ import com.googlecode.androidannotations.annotations.EActivity;
  * @date Sep 29, 2013
  * @version v1.0
  */
-@EActivity(R.layout.activity_main)
+//@EActivity(R.layout.activity_main)
 public class HelloAndroidActivity extends Activity{
+    private MenuDrawer mDrawer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
         //setContentView(R.layout.activity_main);
-        
+        mDrawer = MenuDrawer.attach(this);
+        mDrawer.setContentView(R.layout.activity_sample);
+        mDrawer.setMenuView(R.layout.menu_sample);
+
         DownloadTask task = new DownloadTask(this);
         task.setUrl("http://www.appchina.com/market/d/1019394/cop.baidu_0/com.hd.explorer.apk");
         task.setPath("/mnt/sdcard/10120702.apk");
