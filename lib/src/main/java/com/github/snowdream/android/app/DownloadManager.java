@@ -14,19 +14,17 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.github.snowdream.android.net;
+package com.github.snowdream.android.app;
 
 import android.app.Activity;
 import android.content.Context;
 
-import com.github.snowdream.android.net.dao.ISql;
-import com.github.snowdream.android.net.dao.ISqlImpl;
+import com.github.snowdream.android.app.dao.ISql;
+import com.github.snowdream.android.app.dao.ISqlImpl;
 import com.github.snowdream.android.util.Log;
 
 import java.io.File;
 import java.sql.SQLException;
-
-import javax.security.auth.login.LoginException;
 
 /**
  * @author snowdream <yanghui1986527@gmail.com>

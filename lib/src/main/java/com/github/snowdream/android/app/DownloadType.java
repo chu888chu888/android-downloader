@@ -14,17 +14,43 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.github.snowdream.android.net;
-
-import com.github.snowdream.android.util.concurrent.TaskListener;
+package com.github.snowdream.android.app;
 
 /**
- * 
+ * The type of the DownloadTask
  *
  * @author snowdream <yanghui1986527@gmail.com>
  * @date Sep 29, 2013
  * @version v1.0
  */
-@SuppressWarnings("hiding")
-public class DownloadListener<Integer, DownloadTask> extends TaskListener<Integer, DownloadTask> {
+public class DownloadType {
+    /**
+     * Unknown Type
+     */
+    public static final int TYPE_UNKNOWN = 0x00000000;
+    
+    /**
+     * Text
+     */
+    public static final int TYPE_TEXT = 0x00000001;
+    
+    /**
+     * Image
+     */
+    public static final int TYPE_IMAGE = 0x00000002;
+    
+    /**
+     * Music
+     */
+    public static final int TYPE_MUSIC = 0x00000003;
+    
+    /**
+     * Video
+     */
+    public static final int TYPE_VIDEO = 0x00000004;
+    
+    /**
+     * App
+     */
+    public static final int TYPE_APP = 0x00000005;    
 }

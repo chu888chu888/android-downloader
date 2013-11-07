@@ -14,21 +14,49 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.github.snowdream.android.net;
+package com.github.snowdream.android.app;
 
 
 /**
- * 
- *
  * @author snowdream <yanghui1986527@gmail.com>
  * @date Sep 29, 2013
  * @version v1.0
  */
-@Deprecated
-public class DownloadSettings {
-    private int max_tasks = 10;
+public class DownloadException extends Exception {
+    private int code = UNKNOWN;
+
+    /** serialVersionUID **/
+    private static final long serialVersionUID = -3804737584048978515L;
+
+    public static final int UNKNOWN = 0;
+
+    /**
+     * The task is not valid.
+     */
+    public static final int DOWNLOAD_TASK_NOT_VALID = 1;
     
-    private int max_threads = 10;
+    /**
+     * the operation is not valid.
+     */
+    public static final int OPERATION_NOT_VALID = 10;
     
-    private String storage_path = "";
+    /**
+     * The task failed.
+     */
+    public static final int DOWNLOAD_TASK_FAILED = 11;
+
+    public DownloadException() {
+    }
+
+    public DownloadException(int code) {
+        this.code = code;
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
 }

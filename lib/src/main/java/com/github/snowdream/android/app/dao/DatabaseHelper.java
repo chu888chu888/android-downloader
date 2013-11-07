@@ -14,12 +14,12 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.github.snowdream.android.net.dao;
+package com.github.snowdream.android.app.dao;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.github.snowdream.android.net.DownloadTask;
+import com.github.snowdream.android.app.DownloadTask;
 import com.github.snowdream.android.util.Log;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;

@@ -14,11 +14,14 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.github.snowdream.android.net;
+package com.github.snowdream.android.apps.downloader;
 
 import android.app.Activity;
 import android.os.Bundle;
 
+import com.github.snowdream.android.app.DownloadListener;
+import com.github.snowdream.android.app.DownloadManager;
+import com.github.snowdream.android.app.DownloadTask;
 import com.googlecode.androidannotations.annotations.EActivity;
 
 /**

@@ -14,25 +14,27 @@
  * limitations under the License.
  *******************************************************************************/
 
-package com.github.snowdream.android.net.dao;
+package com.github.snowdream.android.app.dao;
 
-import com.j256.ormlite.android.apptools.OrmLiteConfigUtil;
+import com.github.snowdream.android.app.DownloadTask;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 /**
- * Database helper class used to manage the creation and upgrading of your
- * database. This class also usually provides the DAOs used by the other
- * classes.
  * 
+ *
  * @author snowdream <yanghui1986527@gmail.com>
- * @date 2013-6-10
+ * @date Oct 7, 2013
  * @version v1.0
  */
-public class DatabaseConfigUtil extends OrmLiteConfigUtil {
+public interface ISql {
+    public void addDownloadTask(DownloadTask task) throws SQLException;
 
-    public static void main(String[] args) throws SQLException, IOException {
-        writeConfigFile("ormlite_config.txt");
-    }
+    public void updateDownloadTask(DownloadTask task)throws SQLException;
+
+    public DownloadTask queryDownloadTask(DownloadTask task)throws SQLException;
+    
+    //public List<DownloadTask> queryDownloadTasksFromAlbum(Album album)throws SQLException;
+
+    public void deleteDownloadTask(DownloadTask task)throws SQLException;
 }

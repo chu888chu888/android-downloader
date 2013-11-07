@@ -1,15 +1,14 @@
 
-package com.github.snowdream.android.net;
+package com.github.snowdream.android.app;
 
 import android.content.Context;
-import android.media.MediaCodecInfo.CodecCapabilities;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.webkit.URLUtil;
 
-import com.github.snowdream.android.net.dao.ISql;
-import com.github.snowdream.android.net.dao.ISqlImpl;
+import com.github.snowdream.android.app.dao.ISql;
+import com.github.snowdream.android.app.dao.ISqlImpl;
 import com.github.snowdream.android.util.Log;
 import com.github.snowdream.android.util.concurrent.AsyncTask;
 
