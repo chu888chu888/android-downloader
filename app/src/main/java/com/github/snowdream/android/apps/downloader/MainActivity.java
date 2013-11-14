@@ -19,7 +19,6 @@ package com.github.snowdream.android.apps.downloader;
 import android.app.ListActivity;
 import android.os.Bundle;
 import android.view.Gravity;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -60,20 +59,14 @@ public class MainActivity extends ListActivity {
         mDrawer.setDrawerIndicatorEnabled(true);
 
         List<Object> items = new ArrayList<Object>();
-        items.add(new Item("Item 1", R.drawable.ic_action_refresh_dark));
-        items.add(new Item("Item 2", R.drawable.ic_action_select_all_dark));
-        items.add(new Category("Cat 1"));
-        items.add(new Item("Item 3", R.drawable.ic_action_refresh_dark));
-        items.add(new Item("Item 4", R.drawable.ic_action_select_all_dark));
-        items.add(new Category("Cat 2"));
-        items.add(new Item("Item 5", R.drawable.ic_action_refresh_dark));
-        items.add(new Item("Item 6", R.drawable.ic_action_select_all_dark));
-        items.add(new Category("Cat 3"));
-        items.add(new Item("Item 7", R.drawable.ic_action_refresh_dark));
-        items.add(new Item("Item 8", R.drawable.ic_action_select_all_dark));
-        items.add(new Category("Cat 4"));
-        items.add(new Item("Item 9", R.drawable.ic_action_refresh_dark));
-        items.add(new Item("Item 10", R.drawable.ic_action_select_all_dark));
+        items.add(new MenuItem("MenuItem 1", -1));
+        items.add(new MenuItem("MenuItem 2", -1));
+        items.add(new MenuItem("MenuItem 3", -1));
+        items.add(new MenuItem("MenuItem 4", -1));
+        items.add(new MenuItem("MenuItem 5", -1));
+        items.add(new MenuItem("MenuItem 6", -1));
+        items.add(new MenuItem("MenuItem 7", -1));
+        items.add(new MenuItem("MenuItem 8", -1));
 
         mList = new ListView(this);
         mAdapter = new MenuAdapter(this, items);
@@ -92,7 +85,7 @@ public class MainActivity extends ListActivity {
         List<String> items1;
         items1 = new ArrayList<String>();
         for (int i = 1; i <= 20; i++) {
-            items1.add("Item " + i);
+            items1.add("MenuItem " + i);
         }
 
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items1));
@@ -129,14 +122,14 @@ public class MainActivity extends ListActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
+    public boolean onOptionsItemSelected(android.view.MenuItem menuItem) {
+        switch (menuItem.getItemId()) {
             case android.R.id.home:
                 mDrawer.toggleMenu();
                 return true;
         }
 
-        return super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(menuItem);
     }
 
     @Override

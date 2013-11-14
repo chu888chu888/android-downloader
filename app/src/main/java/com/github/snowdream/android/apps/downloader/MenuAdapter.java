@@ -1,7 +1,6 @@
 package com.github.snowdream.android.apps.downloader;
 
 import android.content.Context;
-import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,22 +54,22 @@ public class MenuAdapter extends BaseAdapter {
 
     @Override
     public int getItemViewType(int position) {
-        return getItem(position) instanceof Item ? 0 : 1;
+        return getItem(position) instanceof MenuItem ? 0 : 1;
     }
 
     @Override
     public int getViewTypeCount() {
-        return 2;
+        return 1;
     }
 
     @Override
     public boolean isEnabled(int position) {
-        return getItem(position) instanceof Item;
+        return getItem(position) instanceof MenuItem;
     }
 
     @Override
     public boolean areAllItemsEnabled() {
-        return false;
+        return true;
     }
 
     @Override
@@ -78,26 +77,17 @@ public class MenuAdapter extends BaseAdapter {
         View v = convertView;
         Object item = getItem(position);
 
-        if (item instanceof Category) {
-            if (v == null) {
-                v = LayoutInflater.from(mContext).inflate(R.layout.menu_row_category, parent, false);
-            }
-
-            ((TextView) v).setText(((Category) item).mTitle);
-
-        } else {
-            if (v == null) {
-                v = LayoutInflater.from(mContext).inflate(R.layout.menu_row_item, parent, false);
-            }
-
-            TextView tv = (TextView) v;
-            tv.setText(((Item) item).mTitle);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                tv.setCompoundDrawablesRelativeWithIntrinsicBounds(((Item) item).mIconRes, 0, 0, 0);
-            } else {
-                tv.setCompoundDrawablesWithIntrinsicBounds(((Item) item).mIconRes, 0, 0, 0);
-            }
+        if (v == null) {
+            v = LayoutInflater.from(mContext).inflate(R.layout.menu_row_item, parent, false);
         }
+
+        TextView tv = (TextView) v;
+        tv.setText(((MenuItem) item).mTitle);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+//            tv.setCompoundDrawablesRelativeWithIntrinsicBounds(((MenuItem) item).mIconRes, 0, 0, 0);
+//        } else {
+//            tv.setCompoundDrawablesWithIntrinsicBounds(((MenuItem) item).mIconRes, 0, 0, 0);
+//        }
 
         v.setTag(R.id.mdActiveViewPosition, position);
 
