@@ -92,7 +92,7 @@ public class MenuAdapter extends BaseAdapter {
         v.setTag(R.id.mdActiveViewPosition, position);
 
         if (position == mActivePosition) {
-            //mListener.onActiveViewChanged(v);
+            mListener.onActiveViewChanged(v);
         }
 
         return v;

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">MenuDrawerSamples</string>
+    <string name="app_name">Snowdream Downloader</string>
 
     <string name="sample_content">Sample of dragging the content.\nThe menu consists of a ListView, for which the
         active position is saved through configuration changes.\nAdditionally, if the menu is open, a back press will

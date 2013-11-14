@@ -36,14 +36,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 
- *
  * @author snowdream <yanghui1986527@gmail.com>
- * @date Sep 29, 2013
  * @version v1.0
+ * @date Sep 29, 2013
  */
 //@EActivity(R.layout.activity_main)
-public class MainActivity extends ListActivity {
+public class MainActivity extends ListActivity implements MenuAdapter.MenuListener {
     private MenuDrawer mDrawer;
     private MenuAdapter mAdapter;
     private ListView mList;
@@ -52,24 +50,23 @@ public class MainActivity extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         //setContentView(R.layout.activity_main);
         mDrawer = MenuDrawer.attach(this);
         mDrawer.setSlideDrawable(R.drawable.ic_drawer);
         mDrawer.setDrawerIndicatorEnabled(true);
 
         List<Object> items = new ArrayList<Object>();
-        items.add(new MenuItem("MenuItem 1", -1));
-        items.add(new MenuItem("MenuItem 2", -1));
-        items.add(new MenuItem("MenuItem 3", -1));
-        items.add(new MenuItem("MenuItem 4", -1));
-        items.add(new MenuItem("MenuItem 5", -1));
-        items.add(new MenuItem("MenuItem 6", -1));
-        items.add(new MenuItem("MenuItem 7", -1));
-        items.add(new MenuItem("MenuItem 8", -1));
+        items.add(new MenuItem("All", -1));
+        items.add(new MenuItem("Downloading", -1));
+        items.add(new MenuItem("Finished", -1));
+        items.add(new MenuItem("Trash", -1));
 
         mList = new ListView(this);
         mAdapter = new MenuAdapter(this, items);
+        mAdapter.setListener(this);
+        mAdapter.setActivePosition(mActivePosition);
+
         mList.setAdapter(mAdapter);
         mDrawer.setMenuView(mList);
         mList.setOnItemClickListener(mItemClickListener);
@@ -80,7 +77,6 @@ public class MainActivity extends ListActivity {
         mDrawer.setContentView(content);
         mDrawer.setSlideDrawable(R.drawable.ic_drawer);
         mDrawer.setDrawerIndicatorEnabled(true);
-        mDrawer.peekDrawer(1000, 0);
 
         List<String> items1;
         items1 = new ArrayList<String>();
@@ -89,7 +85,6 @@ public class MainActivity extends ListActivity {
         }
 
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items1));
-
 
         DownloadTask task = new DownloadTask(this);
         task.setUrl("http://www.appchina.com/market/d/1019394/cop.baidu_0/com.hd.explorer.apk");
@@ -141,5 +136,10 @@ public class MainActivity extends ListActivity {
         }
 
         super.onBackPressed();
+    }
+
+    @Override
+    public void onActiveViewChanged(View v) {
+        mDrawer.setActiveView(v, mActivePosition);
     }
 }
