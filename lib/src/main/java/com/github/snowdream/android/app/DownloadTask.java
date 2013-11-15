@@ -25,13 +25,13 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * The download task
- * 
+ *
  * @author snowdream <yanghui1986527@gmail.com>
- * @date Sep 29, 2013
  * @version v1.0
+ * @date Sep 29, 2013
  */
 @DatabaseTable(tableName = "downloadtask")
-public class DownloadTask {
+public class DownloadTask extends Object {
     /**
      * id
      */
@@ -100,12 +100,16 @@ public class DownloadTask {
 
     @SuppressWarnings("unused")
     private DownloadTask() {
-    };
+    }
+
+    ;
 
     public DownloadTask(Context context) {
         super();
         this.context = context;
-    };
+    }
+
+    ;
 
     public int getId() {
         return id;
@@ -196,8 +200,8 @@ public class DownloadTask {
     }
 
     /**
-     * Start the Task 
-     * 
+     * Start the Task
+     *
      * @param listener
      */
     @SuppressWarnings({
@@ -212,7 +216,7 @@ public class DownloadTask {
 
     /**
      * Cancel the Task
-     * 
+     *
      * @param listener
      */
     @SuppressWarnings("rawtypes")
@@ -220,8 +224,8 @@ public class DownloadTask {
         if (task != null) {
             task.cancel(false);
         }
-    }    
-    
+    }
+
     @Override
     public int hashCode() {
         return url.hashCode();
@@ -230,11 +234,13 @@ public class DownloadTask {
     @Override
     public boolean equals(Object obj) {
         return super.equals(obj);
-    };
-    
+    }
+
+    ;
+
     @Override
     public String toString() {
-        return ToStringBuilder.reflectionToString(this);  
+        return ToStringBuilder.reflectionToString(this);
     }
-    
+
 }

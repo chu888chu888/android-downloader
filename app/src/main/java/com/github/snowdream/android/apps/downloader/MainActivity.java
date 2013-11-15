@@ -21,13 +21,12 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.github.snowdream.android.app.DownloadListener;
 import com.github.snowdream.android.app.DownloadManager;
+import com.github.snowdream.android.app.DownloadStatus;
 import com.github.snowdream.android.app.DownloadTask;
 
 import net.simonvt.menudrawer.MenuDrawer;
@@ -54,6 +53,9 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
         //setContentView(R.layout.activity_main);
         mDrawer = MenuDrawer.attach(this);
         mDrawer.setSlideDrawable(R.drawable.ic_drawer);
+        mDrawer.setMenuSize(250);
+
+
         mDrawer.setDrawerIndicatorEnabled(true);
 
         List<Object> items = new ArrayList<Object>();
@@ -84,13 +86,18 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
             items1.add("MenuItem " + i);
         }
 
-        setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items1));
+        List<DownloadTask> list = new ArrayList<DownloadTask>();
 
         DownloadTask task = new DownloadTask(this);
+        task.setName("HDExplorer");
         task.setUrl("http://www.appchina.com/market/d/1019394/cop.baidu_0/com.hd.explorer.apk");
         task.setPath("/mnt/sdcard/10120702.apk");
+        task.setSize(685630);
         DownloadManager.add(task);
-        DownloadManager.start(task, new DownloadListener<Integer, DownloadTask>());
+        list.add(task);
+
+        DownloadTaskAdapter adapter = new DownloadTaskAdapter(this, list);
+        setListAdapter(adapter);
     }
 
     private AdapterView.OnItemClickListener mItemClickListener = new AdapterView.OnItemClickListener() {
@@ -112,8 +119,30 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        String str = (String) getListAdapter().getItem(position);
-        Toast.makeText(this, "Clicked: " + str, Toast.LENGTH_SHORT).show();
+
+        DownloadTask task = (DownloadTask) getListAdapter().getItem(position);
+
+        if (task == null) {
+            return;
+        }
+
+        switch (task.getStatus()) {
+            case DownloadStatus.STATUS_PENDING:
+            case DownloadStatus.STATUS_FAILED:
+            case DownloadStatus.STATUS_STOPPED:
+                DownloadManager.start(task, new DownloadListener<Integer, DownloadTask>(){
+
+                });
+                break;
+            case DownloadStatus.STATUS_RUNNING:
+                DownloadManager.pause(task, new DownloadListener<Integer, DownloadTask>());
+                break;
+            case DownloadStatus.STATUS_PAUSED:
+                DownloadManager.resume(task, new DownloadListener<Integer, DownloadTask>());
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
