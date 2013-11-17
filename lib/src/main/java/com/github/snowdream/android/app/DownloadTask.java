@@ -111,6 +111,40 @@ public class DownloadTask extends Object {
 
     ;
 
+    public DownloadTask(DownloadTask task) {
+        this.context = task.context;
+        this.startTime = task.startTime;
+        this.finishTime = task.finishTime;
+        this.id = task.id;
+        this.mimeType = task.mimeType;
+        this.name = task.name;
+        this.path = task.path;
+        this.size = task.size;
+        this.status = task.status;
+        this.type = task.type;
+        this.url = task.url;
+        this.task = task.task;
+    }
+
+    ;
+
+    public void setDownloadTask(DownloadTask task) {
+        //this.context = task.context;
+        this.startTime = task.startTime;
+        this.finishTime = task.finishTime;
+        this.id = task.id;
+        this.mimeType = task.mimeType;
+        this.name = task.name;
+        this.path = task.path;
+        this.size = task.size;
+        this.status = task.status;
+        this.type = task.type;
+        this.url = task.url;
+        //this.task = task.task;
+    }
+
+    ;
+
     public int getId() {
         return id;
     }

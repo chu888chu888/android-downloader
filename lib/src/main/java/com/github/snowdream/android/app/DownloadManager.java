@@ -114,7 +114,7 @@ public class DownloadManager {
             if (temptask == null) {
                 add(task);
             } else if (!temptask.equals(task)) {
-                task = temptask;
+                task.setDownloadTask(temptask);
             }
 
             switch (task.getStatus()) {

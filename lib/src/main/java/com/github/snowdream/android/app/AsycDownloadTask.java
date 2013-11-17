@@ -59,6 +59,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                                 DownloadException.DOWNLOAD_TASK_NOT_VALID)).sendToTarget();
             }
 
+            Log.e("There is no DownloadTask.");
             return null;
         }
 
@@ -71,6 +72,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                         new AsyncTaskResult(this, task,
                                 DownloadException.DOWNLOAD_TASK_NOT_VALID)).sendToTarget();
             }
+            Log.e("The task is not valid,or the url of the task is not valid.");
 
             return null;
         }
@@ -127,7 +129,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
 
             String urlString = task.getUrl();
             String cookies = null;
-            while(true){
+            while (true) {
                 URL url = new URL(urlString);
                 connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestProperty("User-Agent", "Snowdream Mobile");
@@ -162,7 +164,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                 // normally, 3xx is redirect
                 int status = connection.getResponseCode();
                 Log.i("HTTP STATUS CODE: " + status);
-                
+
                 if (status != HttpURLConnection.HTTP_OK) {
                     if (status == HttpURLConnection.HTTP_MOVED_TEMP
                             || status == HttpURLConnection.HTTP_MOVED_PERM
@@ -179,10 +181,10 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                         redirect = true;
                         // get redirect url from "location" header field
                         urlString = connection.getHeaderField("Location");
-                 
+
                         // get the cookie if need, for login
                         cookies = connection.getHeaderField("Set-Cookie");
-                        
+
                         Log.i("Redirect Url : " + urlString);
                         break;
                     default:
@@ -190,7 +192,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                         break;
                 }
 
-                
+
                 if (!redirect) {
                     if (!success) {
                         if (!isCancelled()) {
@@ -201,13 +203,14 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                                     .sendToTarget();
                         }
                         Log.e("Http Connection error. ");
-                    }else {
+                    } else {
                         Log.i("Successed to establish the http connection.Ready to download...");
                     }
-                    
+
                     break;
                 }
-            };
+            }
+            ;
 
             size = connection.getContentLength();
             contentType = connection.getContentType();
@@ -228,8 +231,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
 
             byte[] buffer = new byte[1024];
             int nRead = 0;
-            while ((nRead = in.read(buffer, 0, 1024)) > 0)
-            {
+            while ((nRead = in.read(buffer, 0, 1024)) > 0) {
                 while (task.getStatus() == DownloadStatus.STATUS_PAUSED) {
                     Log.i("Pause the DownloadTask,Sleeping...");
                     Thread.sleep(500);
@@ -275,6 +277,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                     task.setFinishTime(System.currentTimeMillis());
                     range = file.length();
                     size = task.getSize();
+                    Log.i("range: "+ range +" size: "+size);
                     if (range != 0 && range == size) {
                         if (!isCancelled()) {
                             sHandler.obtainMessage(
@@ -358,7 +361,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
 
     /**
      * throw error
-     * 
+     *
      * @param mData
      */
     private void OnError(DownloadTask task, Integer code) {
@@ -372,7 +375,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
 
     /**
      * finish
-     * 
+     *
      * @param mData
      */
     private void OnFinish(DownloadTask task) {
@@ -385,7 +388,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
 
     /**
      * Update the status of the DownloadTask,and save it to the sqlite
-     * 
+     *
      * @param task
      * @param status
      */
@@ -431,7 +434,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
         final DownloadTask mDownloadTask;
 
         AsyncTaskResult(@SuppressWarnings("rawtypes")
-        AsyncTask task, DownloadTask downloadtask, Integer data) {
+                        AsyncTask task, DownloadTask downloadtask, Integer data) {
             mTask = task;
             mData = data;
             mDownloadTask = downloadtask;

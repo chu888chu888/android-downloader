@@ -131,7 +131,36 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
             case DownloadStatus.STATUS_FAILED:
             case DownloadStatus.STATUS_STOPPED:
                 DownloadManager.start(task, new DownloadListener<Integer, DownloadTask>(){
+                    @Override
+                    public void onStart() {
+                        super.onStart();
+                    }
 
+                    @Override
+                    public void onProgressUpdate(Integer... values) {
+                        super.onProgressUpdate(values);
+                        getListAdapter().notify();
+                    }
+
+                    @Override
+                    public void onSuccess(DownloadTask downloadTask) {
+                        super.onSuccess(downloadTask);
+                    }
+
+                    @Override
+                    public void onCancelled() {
+                        super.onCancelled();
+                    }
+
+                    @Override
+                    public void onError(Throwable thr) {
+                        super.onError(thr);
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        super.onFinish();
+                    }
                 });
                 break;
             case DownloadStatus.STATUS_RUNNING:
