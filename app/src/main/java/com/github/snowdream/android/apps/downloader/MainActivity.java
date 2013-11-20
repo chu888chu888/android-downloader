@@ -28,6 +28,7 @@ import com.github.snowdream.android.app.DownloadListener;
 import com.github.snowdream.android.app.DownloadManager;
 import com.github.snowdream.android.app.DownloadStatus;
 import com.github.snowdream.android.app.DownloadTask;
+import com.github.snowdream.android.util.Log;
 
 import net.simonvt.menudrawer.MenuDrawer;
 
@@ -49,6 +50,8 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.setPath("/mnt/sdcard/snowdream/log","log","log");
+        Log.setPolicy(Log.LOG_ERROR_TO_FILE);
 
         //setContentView(R.layout.activity_main);
         mDrawer = MenuDrawer.attach(this);
@@ -130,7 +133,7 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
             case DownloadStatus.STATUS_PENDING:
             case DownloadStatus.STATUS_FAILED:
             case DownloadStatus.STATUS_STOPPED:
-                DownloadManager.start(task, new DownloadListener<Integer, DownloadTask>(){
+                DownloadManager.start(task, new DownloadListener<Integer, DownloadTask>() {
                     @Override
                     public void onStart() {
                         super.onStart();
