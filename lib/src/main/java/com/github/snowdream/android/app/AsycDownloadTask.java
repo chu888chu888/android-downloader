@@ -214,6 +214,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
             switch (mode) {
                 case MODE_DEFAULT:
                     range = file.length();
+                    task.setFinishTime(System.currentTimeMillis());
                     if (range != 0 && range == size) {
                         return task;
                     }
