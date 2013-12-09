@@ -142,7 +142,7 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
                     @Override
                     public void onProgressUpdate(Integer... values) {
                         super.onProgressUpdate(values);
-                        getListAdapter().notify();
+                        ((DownloadTaskAdapter)getListAdapter()).notifyDataSetChanged();
                     }
 
                     @Override

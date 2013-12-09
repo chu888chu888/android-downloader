@@ -21,8 +21,6 @@ import java.sql.SQLException;
 public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadTask> {
     private static final InternalHandler sHandler = new InternalHandler();
     private static final int MESSAGE_POST_ERROR = 0x1;
-    private static final int MESSAGE_POST_SUCCESS = 0x2;
-    private static final int MESSAGE_POST_PROGRESS = 0x3;
 
     /**
      * http default
@@ -52,10 +50,9 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
         DownloadTask task = tasks[0];
 
         if (task == null || task.getUrl() == null || !URLUtil.isValidUrl(task.getUrl())) {
-            SendError(task,DownloadException.DOWNLOAD_TASK_FAILED);
+            SendError(task, DownloadException.DOWNLOAD_TASK_NOT_VALID);
 
             Log.e("The task is not valid,or the url of the task is not valid.");
-
             return null;
         }
 
@@ -74,31 +71,27 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
 
             File dir = file.getParentFile();
 
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-
-            range = file.length();
-            curSize = range;
-
-            if (!file.canWrite()) {
-                SendError(task,DownloadException.DOWNLOAD_TASK_FAILED);
-
+            if (!dir.exists() && !dir.mkdirs()) {
+                SendError(task, DownloadException.DOWNLOAD_TASK_FAILED);
+                Log.e("The directory of the file can not be created!");
                 return null;
             }
 
-            // The download task has already downloaded
+            if (!file.exists() && !file.createNewFile() && !file.canWrite()) {
+                SendError(task, DownloadException.DOWNLOAD_TASK_FAILED);
+                Log.e("The file can not be created!");
+                return null;
+            }
+
             if (task.getStatus() == DownloadStatus.STATUS_FINISHED && task.getSize() == range) {
-                SendFinish(task);
                 Log.i("The DownloadTask has already been downloaded.");
                 return task;
             }
 
             task.setStatus(DownloadStatus.STATUS_RUNNING);
+
+            range = file.length();
+            curSize = range;
 
             String urlString = task.getUrl();
             String cookies = null;
@@ -137,12 +130,6 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                 int status = connection.getResponseCode();
                 Log.i("HTTP STATUS CODE: " + status);
 
-                if (status != HttpURLConnection.HTTP_OK) {
-                    if (status == HttpURLConnection.HTTP_MOVED_TEMP
-                            || status == HttpURLConnection.HTTP_MOVED_PERM
-                            || status == HttpURLConnection.HTTP_SEE_OTHER)
-                        redirect = true;
-                }
                 switch (status) {
                     case HttpURLConnection.HTTP_OK:
                         success = true;
@@ -167,13 +154,12 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
 
                 if (!redirect) {
                     if (!success) {
-                        SendError(task,DownloadException.DOWNLOAD_TASK_FAILED);
+                        SendError(task, DownloadException.DOWNLOAD_TASK_FAILED);
 
                         Log.e("Http Connection error. ");
-                    } else {
-                        Log.i("Successed to establish the http connection.Ready to download...");
+                        return null;
                     }
-
+                    Log.i("Successed to establish the http connection.Ready to download...");
                     break;
                 }
             };
@@ -212,7 +198,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                     progress = (int) ((curSize / size) * 100);
                 }
 
-                SendProgressUpdate(task, progress);
+                publishProgress(progress);
 
                 Log.i("cur size:" + (curSize) + "    total size:" + (size) + "    cur progress:" + (progress));
 
@@ -229,10 +215,9 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                 case MODE_DEFAULT:
                     range = file.length();
                     if (range != 0 && range == size) {
-                        SendFinish(task);
-                    } else {
-                        SendError(task,DownloadException.DOWNLOAD_TASK_FAILED);
+                        return task;
                     }
+                    SendError(task, DownloadException.DOWNLOAD_TASK_FAILED);
                     break;
                 case MODE_TRUNKED:
                     task.setSize(curSize);
@@ -241,32 +226,31 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                     size = task.getSize();
                     Log.i("range: " + range + " size: " + size);
                     if (range != 0 && range == size) {
-                        SendFinish(task);
-                    } else {
-                        SendError(task,DownloadException.DOWNLOAD_TASK_FAILED);
+                        return task;
                     }
+                    SendError(task, DownloadException.DOWNLOAD_TASK_FAILED);
                     break;
                 default:
                     break;
             }
         } catch (MalformedURLException e) {
-            SendError(task,DownloadException.DOWNLOAD_TASK_NOT_VALID);
+            SendError(task, DownloadException.DOWNLOAD_TASK_NOT_VALID);
 
             e.printStackTrace();
         } catch (ProtocolException e) {
-            SendError(task,DownloadException.DOWNLOAD_TASK_NOT_VALID);
+            SendError(task, DownloadException.DOWNLOAD_TASK_NOT_VALID);
 
             e.printStackTrace();
         } catch (FileNotFoundException e) {
-            SendError(task,DownloadException.DOWNLOAD_TASK_NOT_VALID);
+            SendError(task, DownloadException.DOWNLOAD_TASK_NOT_VALID);
 
             e.printStackTrace();
         } catch (IOException e) {
-            SendError(task,DownloadException.DOWNLOAD_TASK_NOT_VALID);
+            SendError(task, DownloadException.DOWNLOAD_TASK_NOT_VALID);
 
             e.printStackTrace();
         } catch (InterruptedException e) {
-            SendError(task,DownloadException.DOWNLOAD_TASK_NOT_VALID);
+            SendError(task, DownloadException.DOWNLOAD_TASK_NOT_VALID);
 
             e.printStackTrace();
         } finally {
@@ -286,7 +270,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                 connection.disconnect();
             }
         }
-        return task;
+        return null;
     }
 
     private void SendError(DownloadTask task, Integer code) {
@@ -299,56 +283,15 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                         code)).sendToTarget();
     }
 
-    private void SendFinish(DownloadTask task) {
-        Log.i("The DownloadTask has been successfully downloaded.");
-        SaveDownloadTask(task, DownloadStatus.STATUS_FINISHED);
-
-        sHandler.obtainMessage(
-                MESSAGE_POST_SUCCESS,
-                new AsyncTaskResult(this, task, -1)).sendToTarget();
-    }
-
-    private void SendProgressUpdate(DownloadTask task, Integer progress) {
-        Log.i("Update the progress of the DownloadTask");
-        //SaveDownloadTask(task, DownloadStatus.STATUS_FINISHED);
-
-        sHandler.obtainMessage(
-                MESSAGE_POST_PROGRESS,
-                new AsyncTaskResult(this, task,
-                        progress))
-                .sendToTarget();
-    }
-
     /**
      * throw error
      *
-     * @param mData
+     * @param task task
+     * @param code The code of the exception
      */
     private void OnError(DownloadTask task, Integer code) {
         if (listener != null) {
             listener.onError(new DownloadException(code));
-        }
-    }
-
-    /**
-     * finish
-     *
-     * @param mData
-     */
-    private void OnFinish(DownloadTask task) {
-        if (listener != null) {
-            listener.onSuccess(task);
-        }
-    }
-
-    /**
-     * progress
-     *
-     * @param mData
-     */
-    private void onProgressUpdate(DownloadTask task, Integer progress) {
-        if (listener != null) {
-            listener.onProgressUpdate(progress);
         }
     }
 
@@ -389,12 +332,6 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
             switch (msg.what) {
                 case MESSAGE_POST_ERROR:
                     ((AsycDownloadTask) result.mTask).OnError(result.mDownloadTask, result.mData);
-                    break;
-                case MESSAGE_POST_SUCCESS:
-                    ((AsycDownloadTask) result.mTask).OnFinish(result.mDownloadTask);
-                    break;
-                case MESSAGE_POST_PROGRESS:
-                    ((AsycDownloadTask) result.mTask).onProgressUpdate(result.mDownloadTask, result.mData);
                     break;
                 default:
                     break;
