@@ -6,18 +6,12 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.webkit.URLUtil;
-
 import com.github.snowdream.android.app.dao.ISql;
 import com.github.snowdream.android.app.dao.ISqlImpl;
 import com.github.snowdream.android.util.Log;
 import com.github.snowdream.android.util.concurrent.AsyncTask;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -26,21 +20,20 @@ import java.sql.SQLException;
 
 public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadTask> {
     private static final InternalHandler sHandler = new InternalHandler();
-
     private static final int MESSAGE_POST_ERROR = 0x1;
     private static final int MESSAGE_POST_SUCCESS = 0x2;
-
-    private int mode = MODE_DEFAULT;
+    private static final int MESSAGE_POST_PROGRESS = 0x3;
 
     /**
      * http default
      */
     private static final int MODE_DEFAULT = 0x1;
-
     /**
      * http trunked
      */
     private static final int MODE_TRUNKED = 0x2;
+
+    private int mode = MODE_DEFAULT;
 
     public AsycDownloadTask(DownloadListener<Integer, DownloadTask> listener) {
         super(listener);
@@ -52,13 +45,6 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
      */
     protected DownloadTask doInBackground(DownloadTask... tasks) {
         if (tasks.length <= 0) {
-            if (!isCancelled()) {
-                sHandler.obtainMessage(
-                        MESSAGE_POST_ERROR,
-                        new AsyncTaskResult(this, null,
-                                DownloadException.DOWNLOAD_TASK_NOT_VALID)).sendToTarget();
-            }
-
             Log.e("There is no DownloadTask.");
             return null;
         }
@@ -66,12 +52,8 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
         DownloadTask task = tasks[0];
 
         if (task == null || task.getUrl() == null || !URLUtil.isValidUrl(task.getUrl())) {
-            if (!isCancelled()) {
-                sHandler.obtainMessage(
-                        MESSAGE_POST_ERROR,
-                        new AsyncTaskResult(this, task,
-                                DownloadException.DOWNLOAD_TASK_NOT_VALID)).sendToTarget();
-            }
+            SendError(task,DownloadException.DOWNLOAD_TASK_FAILED);
+
             Log.e("The task is not valid,or the url of the task is not valid.");
 
             return null;
@@ -104,23 +86,14 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
             curSize = range;
 
             if (!file.canWrite()) {
-                if (!isCancelled()) {
-                    sHandler.obtainMessage(
-                            MESSAGE_POST_ERROR,
-                            new AsyncTaskResult(this, task,
-                                    DownloadException.DOWNLOAD_TASK_NOT_VALID)).sendToTarget();
-                }
+                SendError(task,DownloadException.DOWNLOAD_TASK_FAILED);
 
                 return null;
             }
 
             // The download task has already downloaded
             if (task.getStatus() == DownloadStatus.STATUS_FINISHED && task.getSize() == range) {
-                if (!isCancelled()) {
-                    sHandler.obtainMessage(
-                            MESSAGE_POST_SUCCESS,
-                            new AsyncTaskResult(this, task, -1)).sendToTarget();
-                }
+                SendFinish(task);
                 Log.i("The DownloadTask has already been downloaded.");
                 return task;
             }
@@ -144,16 +117,15 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                             "-");
                 }
 
-                // String acceptRanges =
-                // connection.getHeaderField("Accept-Ranges");
+
                 String tranfer_encoding = connection.getHeaderField("Transfer-Encoding");
                 if (!TextUtils.isEmpty(tranfer_encoding)
                         && tranfer_encoding.equalsIgnoreCase("chunked")) {
                     mode = MODE_TRUNKED;
-                    Log.i("HTTP MODE: DEFAULT");
+                    Log.i("HTTP MODE: TRUNKED");
                 } else {
                     mode = MODE_DEFAULT;
-                    Log.i("HTTP MODE: TRUNKED");
+                    Log.i("HTTP MODE: DEFAULT");
                 }
 
                 //http auto redirection
@@ -195,13 +167,8 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
 
                 if (!redirect) {
                     if (!success) {
-                        if (!isCancelled()) {
-                            sHandler.obtainMessage(
-                                    MESSAGE_POST_ERROR,
-                                    new AsyncTaskResult(this, task,
-                                            DownloadException.DOWNLOAD_TASK_FAILED))
-                                    .sendToTarget();
-                        }
+                        SendError(task,DownloadException.DOWNLOAD_TASK_FAILED);
+
                         Log.e("Http Connection error. ");
                     } else {
                         Log.i("Successed to establish the http connection.Ready to download...");
@@ -209,8 +176,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
 
                     break;
                 }
-            }
-            ;
+            };
 
             size = connection.getContentLength();
             contentType = connection.getContentType();
@@ -231,6 +197,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
 
             byte[] buffer = new byte[1024];
             int nRead = 0;
+            int progress = -1;
             while ((nRead = in.read(buffer, 0, 1024)) > 0) {
                 while (task.getStatus() == DownloadStatus.STATUS_PAUSED) {
                     Log.i("Pause the DownloadTask,Sleeping...");
@@ -240,7 +207,14 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                 out.write(buffer, 0, nRead);
 
                 curSize += nRead;
-                Log.i("cur size:" + (curSize) + "    total size:" + (size));
+
+                if (size != 0) {
+                    progress = (int) ((curSize / size) * 100);
+                }
+
+                SendProgressUpdate(task, progress);
+
+                Log.i("cur size:" + (curSize) + "    total size:" + (size) + "    cur progress:" + (progress));
 
                 if (isCancelled())
                     break;
@@ -255,21 +229,9 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                 case MODE_DEFAULT:
                     range = file.length();
                     if (range != 0 && range == size) {
-                        task.setFinishTime(System.currentTimeMillis());
-                        if (!isCancelled()) {
-                            sHandler.obtainMessage(
-                                    MESSAGE_POST_SUCCESS,
-                                    new AsyncTaskResult(this, task, -1)).sendToTarget();
-                        }
-                        Log.i("The DownloadTask has been successfully downloaded.");
+                        SendFinish(task);
                     } else {
-                        if (!isCancelled()) {
-                            sHandler.obtainMessage(
-                                    MESSAGE_POST_ERROR,
-                                    new AsyncTaskResult(this, task,
-                                            DownloadException.DOWNLOAD_TASK_FAILED))
-                                    .sendToTarget();
-                        }
+                        SendError(task,DownloadException.DOWNLOAD_TASK_FAILED);
                     }
                     break;
                 case MODE_TRUNKED:
@@ -277,67 +239,35 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                     task.setFinishTime(System.currentTimeMillis());
                     range = file.length();
                     size = task.getSize();
-                    Log.i("range: "+ range +" size: "+size);
+                    Log.i("range: " + range + " size: " + size);
                     if (range != 0 && range == size) {
-                        if (!isCancelled()) {
-                            sHandler.obtainMessage(
-                                    MESSAGE_POST_SUCCESS,
-                                    new AsyncTaskResult(this, task, -1)).sendToTarget();
-                        }
-                        Log.i("The DownloadTask has been successfully downloaded.");
+                        SendFinish(task);
                     } else {
-                        if (!isCancelled()) {
-                            sHandler.obtainMessage(
-                                    MESSAGE_POST_ERROR,
-                                    new AsyncTaskResult(this, task,
-                                            DownloadException.DOWNLOAD_TASK_FAILED))
-                                    .sendToTarget();
-                        }
+                        SendError(task,DownloadException.DOWNLOAD_TASK_FAILED);
                     }
                     break;
                 default:
                     break;
             }
-
         } catch (MalformedURLException e) {
-            if (!isCancelled()) {
-                sHandler.obtainMessage(
-                        MESSAGE_POST_ERROR,
-                        new AsyncTaskResult(this, task,
-                                DownloadException.DOWNLOAD_TASK_NOT_VALID)).sendToTarget();
-            }
+            SendError(task,DownloadException.DOWNLOAD_TASK_NOT_VALID);
+
             e.printStackTrace();
         } catch (ProtocolException e) {
-            if (!isCancelled()) {
-                sHandler.obtainMessage(
-                        MESSAGE_POST_ERROR,
-                        new AsyncTaskResult(this, task,
-                                DownloadException.DOWNLOAD_TASK_NOT_VALID)).sendToTarget();
-            }
+            SendError(task,DownloadException.DOWNLOAD_TASK_NOT_VALID);
+
             e.printStackTrace();
         } catch (FileNotFoundException e) {
-            if (!isCancelled()) {
-                sHandler.obtainMessage(
-                        MESSAGE_POST_ERROR,
-                        new AsyncTaskResult(this, task,
-                                DownloadException.DOWNLOAD_TASK_NOT_VALID)).sendToTarget();
-            }
+            SendError(task,DownloadException.DOWNLOAD_TASK_NOT_VALID);
+
             e.printStackTrace();
         } catch (IOException e) {
-            if (!isCancelled()) {
-                sHandler.obtainMessage(
-                        MESSAGE_POST_ERROR,
-                        new AsyncTaskResult(this, task,
-                                DownloadException.DOWNLOAD_TASK_NOT_VALID)).sendToTarget();
-            }
+            SendError(task,DownloadException.DOWNLOAD_TASK_NOT_VALID);
+
             e.printStackTrace();
         } catch (InterruptedException e) {
-            if (!isCancelled()) {
-                sHandler.obtainMessage(
-                        MESSAGE_POST_ERROR,
-                        new AsyncTaskResult(this, task,
-                                DownloadException.DOWNLOAD_TASK_NOT_VALID)).sendToTarget();
-            }
+            SendError(task,DownloadException.DOWNLOAD_TASK_NOT_VALID);
+
             e.printStackTrace();
         } finally {
             try {
@@ -359,15 +289,42 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
         return task;
     }
 
+    private void SendError(DownloadTask task, Integer code) {
+        Log.e("Errors happen while downloading.");
+        SaveDownloadTask(task, DownloadStatus.STATUS_FAILED);
+
+        sHandler.obtainMessage(
+                MESSAGE_POST_ERROR,
+                new AsyncTaskResult(this, task,
+                        code)).sendToTarget();
+    }
+
+    private void SendFinish(DownloadTask task) {
+        Log.i("The DownloadTask has been successfully downloaded.");
+        SaveDownloadTask(task, DownloadStatus.STATUS_FINISHED);
+
+        sHandler.obtainMessage(
+                MESSAGE_POST_SUCCESS,
+                new AsyncTaskResult(this, task, -1)).sendToTarget();
+    }
+
+    private void SendProgressUpdate(DownloadTask task, Integer progress) {
+        Log.i("Update the progress of the DownloadTask");
+        //SaveDownloadTask(task, DownloadStatus.STATUS_FINISHED);
+
+        sHandler.obtainMessage(
+                MESSAGE_POST_PROGRESS,
+                new AsyncTaskResult(this, task,
+                        progress))
+                .sendToTarget();
+    }
+
     /**
      * throw error
      *
      * @param mData
      */
     private void OnError(DownloadTask task, Integer code) {
-        Log.e("Errors happen while downloading.");
-        SaveDownloadTask(task, DownloadStatus.STATUS_FAILED);
-
         if (listener != null) {
             listener.onError(new DownloadException(code));
         }
@@ -379,10 +336,19 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
      * @param mData
      */
     private void OnFinish(DownloadTask task) {
-        SaveDownloadTask(task, DownloadStatus.STATUS_FINISHED);
-
         if (listener != null) {
             listener.onSuccess(task);
+        }
+    }
+
+    /**
+     * progress
+     *
+     * @param mData
+     */
+    private void onProgressUpdate(DownloadTask task, Integer progress) {
+        if (listener != null) {
+            listener.onProgressUpdate(progress);
         }
     }
 
@@ -414,12 +380,21 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
         @Override
         public void handleMessage(Message msg) {
             AsyncTaskResult result = (AsyncTaskResult) msg.obj;
+
+            if (result == null || result.mTask == null || result.mTask.isCancelled()) {
+                Log.i("The asyncTask is not valid or cancelled!");
+                return;
+            }
+
             switch (msg.what) {
                 case MESSAGE_POST_ERROR:
                     ((AsycDownloadTask) result.mTask).OnError(result.mDownloadTask, result.mData);
                     break;
                 case MESSAGE_POST_SUCCESS:
                     ((AsycDownloadTask) result.mTask).OnFinish(result.mDownloadTask);
+                    break;
+                case MESSAGE_POST_PROGRESS:
+                    ((AsycDownloadTask) result.mTask).onProgressUpdate(result.mDownloadTask, result.mData);
                     break;
                 default:
                     break;
