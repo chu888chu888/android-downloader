@@ -241,7 +241,7 @@ public class DownloadTask extends Object {
     @SuppressWarnings({
             "rawtypes", "unchecked"
     })
-    public void start(DownloadListener listener) {
+    protected void start(DownloadListener listener) {
         if (task == null) {
             task = new AsycDownloadTask(listener);
         }
