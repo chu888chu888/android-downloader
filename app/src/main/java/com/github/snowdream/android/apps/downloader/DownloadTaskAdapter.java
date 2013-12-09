@@ -50,6 +50,7 @@ public class DownloadTaskAdapter extends BaseAdapter {
 
         DownloadTask task = (DownloadTask) item;
 
+
         if (v == null) {
             v = LayoutInflater.from(mContext).inflate(R.layout.list_row_downloadtask, parent, false);
         }

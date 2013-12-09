@@ -242,9 +242,12 @@ public class DownloadTask extends Object {
             "rawtypes", "unchecked"
     })
     protected void start(DownloadListener listener) {
-        if (task == null) {
-            task = new AsycDownloadTask(listener);
+        if (task != null) {
+            task.cancel(true);
+            task = null;
         }
+
+        task = new AsycDownloadTask(listener);
         task.execute(this);
     }
 

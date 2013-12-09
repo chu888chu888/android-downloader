@@ -93,9 +93,9 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
 
         DownloadTask task = new DownloadTask(this);
         task.setName("HDExplorer");
-        task.setUrl("http://www.appchina.com/market/d/1019394/cop.baidu_0/com.hd.explorer.apk");
+        task.setUrl("https://hdexplorer.googlecode.com/files/HDExplorer_0.1.3_signed.apk");
         task.setPath("/mnt/sdcard/10120702.apk");
-        task.setSize(685630);
+        task.setSize(469313);
         DownloadManager.add(task);
         list.add(task);
 

@@ -195,7 +195,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                 curSize += nRead;
 
                 if (size != 0) {
-                    progress = (int) ((curSize / size) * 100);
+                    progress = (int) ((curSize  * 100)/ size);
                 }
 
                 publishProgress(progress);
