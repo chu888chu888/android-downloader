@@ -133,7 +133,7 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
             case DownloadStatus.STATUS_PENDING:
             case DownloadStatus.STATUS_FAILED:
             case DownloadStatus.STATUS_STOPPED:
-                DownloadManager.start(task, new DownloadListener<Integer, DownloadTask>() {
+                DownloadManager.start(this,task, new DownloadListener<Integer, DownloadTask>() {
                     @Override
                     public void onStart() {
                         super.onStart();
@@ -167,10 +167,10 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
                 });
                 break;
             case DownloadStatus.STATUS_RUNNING:
-                DownloadManager.pause(task, new DownloadListener<Integer, DownloadTask>());
+                DownloadManager.pause(task);
                 break;
             case DownloadStatus.STATUS_PAUSED:
-                DownloadManager.resume(task, new DownloadListener<Integer, DownloadTask>());
+                DownloadManager.resume(task);
                 break;
             default:
                 break;

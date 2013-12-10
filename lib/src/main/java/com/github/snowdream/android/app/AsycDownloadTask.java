@@ -110,7 +110,6 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                             "-");
                 }
 
-
                 String tranfer_encoding = connection.getHeaderField("Transfer-Encoding");
                 if (!TextUtils.isEmpty(tranfer_encoding)
                         && tranfer_encoding.equalsIgnoreCase("chunked")) {
@@ -132,6 +131,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
 
                 switch (status) {
                     case HttpURLConnection.HTTP_OK:
+                    case HttpURLConnection.HTTP_PARTIAL:
                         success = true;
                         break;
                     case HttpURLConnection.HTTP_MOVED_TEMP:
@@ -151,7 +151,6 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                         break;
                 }
 
-
                 if (!redirect) {
                     if (!success) {
                         SendError(task, DownloadException.DOWNLOAD_TASK_FAILED);
@@ -162,7 +161,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                     Log.i("Successed to establish the http connection.Ready to download...");
                     break;
                 }
-            };
+            }
 
             size = connection.getContentLength();
             contentType = connection.getContentType();
@@ -184,6 +183,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
             byte[] buffer = new byte[1024];
             int nRead = 0;
             int progress = -1;
+            boolean isFinishDownloading = true;
             while ((nRead = in.read(buffer, 0, 1024)) > 0) {
                 while (task.getStatus() == DownloadStatus.STATUS_PAUSED) {
                     Log.i("Pause the DownloadTask,Sleeping...");
@@ -195,63 +195,68 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                 curSize += nRead;
 
                 if (size != 0) {
-                    progress = (int) ((curSize  * 100)/ size);
+                    progress = (int) ((curSize * 100) / size);
                 }
 
                 publishProgress(progress);
 
                 Log.i("cur size:" + (curSize) + "    total size:" + (size) + "    cur progress:" + (progress));
 
-                if (isCancelled())
+                if (isCancelled()) {
+                    isFinishDownloading = false;
                     break;
+                }
 
                 if ((task.getStatus() != DownloadStatus.STATUS_RUNNING)
                         && (task.getStatus() != DownloadStatus.STATUS_PAUSED)) {
+                    isFinishDownloading = false;
                     break;
                 }
             }
 
-            switch (mode) {
-                case MODE_DEFAULT:
-                    range = file.length();
-                    task.setFinishTime(System.currentTimeMillis());
-                    if (range != 0 && range == size) {
-                        return task;
-                    }
-                    SendError(task, DownloadException.DOWNLOAD_TASK_FAILED);
-                    break;
-                case MODE_TRUNKED:
-                    task.setSize(curSize);
-                    task.setFinishTime(System.currentTimeMillis());
-                    range = file.length();
-                    size = task.getSize();
-                    Log.i("range: " + range + " size: " + size);
-                    if (range != 0 && range == size) {
-                        return task;
-                    }
-                    SendError(task, DownloadException.DOWNLOAD_TASK_FAILED);
-                    break;
-                default:
-                    break;
+            if (!isFinishDownloading) {
+                Log.w("The DownloadTask has not been completely downloaded.");
+                SaveDownloadTask(task, task.getStatus());
+                return null;
+            }
+
+            //when the mode is MODE_TRUNKED,set the latest size.
+            if (size == 0 && curSize != 0) {
+                task.setSize(curSize);
+            }
+
+            range = file.length();
+            size = task.getSize();
+            Log.i("range: " + range + " size: " + size);
+
+            if (range != 0 && range == size) {
+                Log.i("The DownloadTask has been successfully downloaded.");
+                task.setFinishTime(System.currentTimeMillis());
+                SaveDownloadTask(task, DownloadStatus.STATUS_FINISHED);
+                return task;
+            } else {
+                Log.i("The DownloadTask failed to downloaded.");
+                SendError(task, DownloadException.DOWNLOAD_TASK_FAILED);
+                return null;
             }
         } catch (MalformedURLException e) {
-            SendError(task, DownloadException.DOWNLOAD_TASK_NOT_VALID);
+            SendError(task, DownloadException.DOWNLOAD_TASK_FAILED);
 
             e.printStackTrace();
         } catch (ProtocolException e) {
-            SendError(task, DownloadException.DOWNLOAD_TASK_NOT_VALID);
+            SendError(task, DownloadException.DOWNLOAD_TASK_FAILED);
 
             e.printStackTrace();
         } catch (FileNotFoundException e) {
-            SendError(task, DownloadException.DOWNLOAD_TASK_NOT_VALID);
+            SendError(task, DownloadException.DOWNLOAD_TASK_FAILED);
 
             e.printStackTrace();
         } catch (IOException e) {
-            SendError(task, DownloadException.DOWNLOAD_TASK_NOT_VALID);
+            SendError(task, DownloadException.DOWNLOAD_TASK_FAILED);
 
             e.printStackTrace();
         } catch (InterruptedException e) {
-            SendError(task, DownloadException.DOWNLOAD_TASK_NOT_VALID);
+            SendError(task, DownloadException.DOWNLOAD_TASK_FAILED);
 
             e.printStackTrace();
         } finally {
