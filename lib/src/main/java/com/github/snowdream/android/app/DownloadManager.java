@@ -28,19 +28,19 @@ import java.sql.SQLException;
 
 /**
  * @author snowdream <yanghui1986527@gmail.com>
- * @date Sep 29, 2013
  * @version v1.0
+ * @date Sep 29, 2013
  */
 public class DownloadManager {
     /**
      * Add Task
-     * 
-     * @param task
+     *
+     * @param task  DownloadTask
      * @return
      */
     public static boolean add(DownloadTask task) {
         Log.i("Add Task");
-        
+
         boolean ret = false;
 
         if (task == null) {
@@ -59,11 +59,11 @@ public class DownloadManager {
 
         try {
             temptask = iSql.queryDownloadTask(task);
-            
+
             if (temptask == null) {
                 iSql.addDownloadTask(task);
                 Log.i("The Task is stored in the sqlite.");
-            }else {
+            } else {
                 Log.i("The Task is already stored in the sqlite.");
             }
 
@@ -73,34 +73,32 @@ public class DownloadManager {
         }
 
         return ret;
-    };
-
-    // public static void add(List<DownloadTask> tasks) {
-    // };
-    //
-    // public static void start(DownloadListener listener) {
-    // };
+    }
 
     /**
      * Start Task
-     * 
+     *
      * @param task
      * @param listener
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static boolean start(DownloadTask task, DownloadListener listener) {
+    public static boolean start(Context context, DownloadTask task, DownloadListener listener) {
         Log.i("Start Task");
-        
+
         boolean ret = false;
 
         if (task == null) {
+            OnError(context, listener, DownloadException.DOWNLOAD_TASK_NOT_VALID);
             return ret;
         }
 
-        Context context = task.getContext();
+        if (context != null) {
+            task.setContext(context);
+        }
 
-        if (context == null) {
+        if (task.getContext() == null) {
+            OnError(context, listener, DownloadException.CONTEXT_NOT_VALID);
             return ret;
         }
 
@@ -122,11 +120,11 @@ public class DownloadManager {
                     Log.i("The Task is already Running.");
                     break;
                 case DownloadStatus.STATUS_PAUSED:
-                    resume(task, listener);
+                    resume(task);
                     break;
                 default:
                     if (listener != null) {
-                        task.start(listener);
+                        task.start(context, listener);
                     }
                     break;
             }
@@ -137,31 +135,31 @@ public class DownloadManager {
         }
 
         return ret;
-    };
+    }
 
     /**
      * Pause Task<BR />
      * if the task status is not DownloadStatus.STATUS_PAUSED or
      * DownloadStatus.STATUS_RUNNING, then
      * exceptions(DownloadException.OPERATION_NOT_VALID) will be thrown.
-     * 
-     * @param task
-     * @param listener
+     *
+     * @param task  DownloadTask
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static boolean pause(DownloadTask task, DownloadListener listener) {
+    public static boolean pause(DownloadTask task) {
         Log.i("Pause Task");
-        
+
         boolean ret = false;
 
         if (task == null) {
             return ret;
         }
 
+        DownloadListener listener = task.getListener();
         Context context = task.getContext();
 
         if (context == null) {
+            OnError(context, listener, DownloadException.CONTEXT_NOT_VALID);
             return ret;
         }
 
@@ -189,31 +187,31 @@ public class DownloadManager {
         }
 
         return ret;
-    };
+    }
 
     /**
      * Resume Task<BR />
      * if the task status is not DownloadStatus.STATUS_PAUSED or
      * DownloadStatus.STATUS_RUNNING, then
      * errors(DownloadException.OPERATION_NOT_VALID) will be thrown.
-     * 
-     * @param task
-     * @param listener
+     *
+     * @param task  DownloadTask
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static boolean resume(DownloadTask task, DownloadListener listener) {
+    public static boolean resume(DownloadTask task) {
         Log.i("Resume Task");
-        
+
         boolean ret = false;
 
         if (task == null) {
             return ret;
         }
 
+        DownloadListener listener = task.getListener();
         Context context = task.getContext();
 
         if (context == null) {
+            OnError(context, listener, DownloadException.CONTEXT_NOT_VALID);
             return ret;
         }
 
@@ -241,7 +239,7 @@ public class DownloadManager {
         }
 
         return ret;
-    };
+    }
 
     /**
      * Stop Task<BR />
@@ -249,24 +247,24 @@ public class DownloadManager {
      * DownloadStatus.STATUS_PAUSED,DownloadStatus.STATUS_STOPPED or
      * DownloadStatus.STATUS_RUNNING, then
      * exceptions(DownloadException.OPERATION_NOT_VALID) will be thrown.
-     * 
-     * @param task
-     * @param listener
+     *
+     * @param task  DownloadTask
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static boolean stop(DownloadTask task, DownloadListener listener) {
+    public static boolean stop(DownloadTask task) {
         Log.i("Stop Task");
-        
+
         boolean ret = false;
 
         if (task == null) {
             return ret;
         }
 
+        DownloadListener listener = task.getListener();
         Context context = task.getContext();
 
         if (context == null) {
+            OnError(context, listener, DownloadException.CONTEXT_NOT_VALID);
             return ret;
         }
 
@@ -295,29 +293,29 @@ public class DownloadManager {
         }
 
         return ret;
-    };
+    }
 
     /**
      * Delete Task <BR />
      * just set the task status to DownloadStatus.STATUS_DELETED
-     * 
-     * @param task
-     * @param listener
+     *
+     * @param task  DownloadTask
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static boolean delete(DownloadTask task, DownloadListener listener) {
+    public static boolean delete(DownloadTask task) {
         Log.i("Delete Task");
-        
+
         boolean ret = false;
 
         if (task == null) {
             return ret;
         }
 
+        DownloadListener listener = task.getListener();
         Context context = task.getContext();
 
         if (context == null) {
+            OnError(context, listener, DownloadException.CONTEXT_NOT_VALID);
             return ret;
         }
 
@@ -342,20 +340,18 @@ public class DownloadManager {
         }
 
         return ret;
-    };
+    }
 
     /**
      * Delete Task <BR />
      * delete the task ,and the file of the task too.
-     * 
-     * @param task
-     * @param listener
+     *
+     * @param task  DownloadTask
      * @return
      */
-    @SuppressWarnings("rawtypes")
-    public static boolean deleteforever(DownloadTask task, DownloadListener listener) {
+    public static boolean deleteforever(DownloadTask task) {
         Log.i("Delete Task forever");
-        
+
         boolean ret = false;
 
         if (task == null) {
@@ -363,7 +359,7 @@ public class DownloadManager {
         }
 
         // delete the file
-        if (delete(task, listener)) {
+        if (delete(task)) {
             File file = new File(task.getPath());
 
             if (file.exists()) {
@@ -372,50 +368,14 @@ public class DownloadManager {
         }
 
         return ret;
-    };
-
-    // public static void cancel() {
-    // };
-
-    /**
-     * Cancel Task <BR />
-     * like @see {@link DownloadManager#stop(DownloadTask, DownloadListener)} ,
-     * but no exceptions will be thrown.
-     * 
-     * @param task
-     * @param listener
-     * @return
-     */
-    @SuppressWarnings("rawtypes")
-    public static boolean cancel(DownloadTask task, DownloadListener listener) {
-        Log.i("Cancel Task");
-        
-        boolean ret = false;
-
-        if (task == null) {
-            return ret;
-        }
-
-        switch (task.getStatus()) {
-            case DownloadStatus.STATUS_PAUSED:
-            case DownloadStatus.STATUS_RUNNING:
-                stop(task, listener);
-                ret = true;
-                break;
-            default:
-                ret = true;
-                break;
-        }
-
-        return ret;
-    };
+    }
 
     /**
      * throw error
-     * 
-     * @param context
-     * @param listener
-     * @param code
+     *
+     * @param context Context
+     * @param listener DownloadListener
+     * @param code code
      */
     @SuppressWarnings("rawtypes")
     private static void OnError(Context context, final DownloadListener listener, final Integer code) {
