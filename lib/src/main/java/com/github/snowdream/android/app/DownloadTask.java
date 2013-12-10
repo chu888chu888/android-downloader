@@ -232,6 +232,14 @@ public class DownloadTask extends Object {
         this.context = context;
     }
 
+    public DownloadListener getListener() {
+        return listener;
+    }
+
+    public void setListener(DownloadListener listener) {
+        this.listener = listener;
+    }
+
     /**
      * Start the Task
      *
