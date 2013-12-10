@@ -98,20 +98,21 @@ public class DownloadTask extends Object {
     @DatabaseField(persisted = false)
     private Context context = null;
 
+    @DatabaseField(persisted = false)
+    private DownloadListener listener = null;
+
     @SuppressWarnings("unused")
     private DownloadTask() {
     }
-
-    ;
 
     public DownloadTask(Context context) {
         super();
         this.context = context;
     }
 
-    ;
-
     public DownloadTask(DownloadTask task) {
+        if (task == null) return;
+
         this.context = task.context;
         this.startTime = task.startTime;
         this.finishTime = task.finishTime;
@@ -124,9 +125,8 @@ public class DownloadTask extends Object {
         this.type = task.type;
         this.url = task.url;
         this.task = task.task;
+        this.listener = task.listener;
     }
-
-    ;
 
     public void setDownloadTask(DownloadTask task) {
         //this.context = task.context;
@@ -141,9 +141,8 @@ public class DownloadTask extends Object {
         this.type = task.type;
         this.url = task.url;
         //this.task = task.task;
+        //this.listener = task.listener;
     }
-
-    ;
 
     public int getId() {
         return id;
@@ -236,12 +235,18 @@ public class DownloadTask extends Object {
     /**
      * Start the Task
      *
-     * @param listener
+     * @param context Context
+     * @param listener DownloadListener
      */
     @SuppressWarnings({
             "rawtypes", "unchecked"
     })
-    protected void start(DownloadListener listener) {
+    protected void start(Context context,DownloadListener listener) {
+        //Get context,which will be used to communicate with sqlite.
+        if (this.context == null && context != null){
+            this.context = context;
+        }
+
         if (task != null) {
             task.cancel(true);
             task = null;
@@ -272,8 +277,6 @@ public class DownloadTask extends Object {
     public boolean equals(Object obj) {
         return super.equals(obj);
     }
-
-    ;
 
     @Override
     public String toString() {
