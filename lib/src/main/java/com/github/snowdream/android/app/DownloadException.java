@@ -24,16 +24,25 @@ package com.github.snowdream.android.app;
  */
 public class DownloadException extends Exception {
     private int code = UNKNOWN;
+    private String message = "";
 
     /** serialVersionUID **/
     private static final long serialVersionUID = -3804737584048978515L;
 
+    /**
+     * Unknown Error
+     */
     public static final int UNKNOWN = 0;
 
     /**
      * The task is not valid.
      */
     public static final int DOWNLOAD_TASK_NOT_VALID = 1;
+
+    /**
+     * The context is NULL.
+     */
+    public static final int CONTEXT_NOT_VALID = 2;
     
     /**
      * the operation is not valid.
@@ -45,11 +54,19 @@ public class DownloadException extends Exception {
      */
     public static final int DOWNLOAD_TASK_FAILED = 11;
 
-    public DownloadException() {
+    public DownloadException(){
+        this.code = UNKNOWN;
+        generateMessageFromCode(code);
     }
 
     public DownloadException(int code) {
         this.code = code;
+        generateMessageFromCode(code);
+    }
+
+    public DownloadException(int code,String message) {
+        this.code = code;
+        this.message = message;
     }
 
     public int getCode() {
@@ -58,5 +75,42 @@ public class DownloadException extends Exception {
 
     public void setCode(int code) {
         this.code = code;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    /**
+     * Generage the error message with the code
+     * @param code
+     */
+    private void generateMessageFromCode(int code){
+        if (message != null && message != ""){
+            return;
+        }
+
+        switch (code){
+            case DOWNLOAD_TASK_NOT_VALID:
+                message = "The DownloadTask is null or not valid!";
+                break;
+            case CONTEXT_NOT_VALID:
+                message = "The Context is null or not valid!";
+                break;
+            case OPERATION_NOT_VALID:
+                message = "The operation is not allowed!";
+                break;
+            case DOWNLOAD_TASK_FAILED:
+                message = "The Download Task is failed!";
+                break;
+            case UNKNOWN:
+            default:
+                    message = "Unknown Error!";
+                break;
+        }
     }
 }
