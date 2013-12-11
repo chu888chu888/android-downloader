@@ -137,32 +137,38 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
                     @Override
                     public void onStart() {
                         super.onStart();
+                        Log.i("onStart");
                     }
 
                     @Override
                     public void onProgressUpdate(Integer... values) {
                         super.onProgressUpdate(values);
                         ((DownloadTaskAdapter)getListAdapter()).notifyDataSetChanged();
+                        Log.i("onProgressUpdate");
                     }
 
                     @Override
                     public void onSuccess(DownloadTask downloadTask) {
                         super.onSuccess(downloadTask);
+                        Log.i("onSuccess");
                     }
 
                     @Override
                     public void onCancelled() {
                         super.onCancelled();
+                        Log.i("onCancelled");
                     }
 
                     @Override
                     public void onError(Throwable thr) {
                         super.onError(thr);
+                        Log.i("onError");
                     }
 
                     @Override
                     public void onFinish() {
                         super.onFinish();
+                        Log.i("onFinish");
                     }
                 });
                 break;
