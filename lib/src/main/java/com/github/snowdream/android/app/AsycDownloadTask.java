@@ -135,9 +135,9 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                         String accept_ranges = connection.getHeaderField("Accept-Ranges");
                         if (!TextUtils.isEmpty(accept_ranges)
                                 && accept_ranges.equalsIgnoreCase("bytes")) {
-                            range = 0;
                             Log.i("Accept-Ranges: bytes");
                         }else{
+                            range = 0;
                             Log.i("Accept-Ranges: none");
                         }
                         break;
