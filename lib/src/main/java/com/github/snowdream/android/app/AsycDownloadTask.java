@@ -108,16 +108,6 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                             "-");
                 }
 
-                String tranfer_encoding = connection.getHeaderField("Transfer-Encoding");
-                if (!TextUtils.isEmpty(tranfer_encoding)
-                        && tranfer_encoding.equalsIgnoreCase("chunked")) {
-                    mode = MODE_TRUNKED;
-                    Log.i("HTTP MODE: TRUNKED");
-                } else {
-                    mode = MODE_DEFAULT;
-                    Log.i("HTTP MODE: DEFAULT");
-                }
-
                 //http auto redirection
                 //see: http://www.mkyong.com/java/java-httpurlconnection-follow-redirect-example/
                 boolean redirect = false;
@@ -131,6 +121,25 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                     case HttpURLConnection.HTTP_OK:
                     case HttpURLConnection.HTTP_PARTIAL:
                         success = true;
+
+                        String transfer_encoding = connection.getHeaderField("Transfer-Encoding");
+                        if (!TextUtils.isEmpty(transfer_encoding)
+                                && transfer_encoding.equalsIgnoreCase("chunked")) {
+                            mode = MODE_TRUNKED;
+                            Log.i("HTTP MODE: TRUNKED");
+                        } else {
+                            mode = MODE_DEFAULT;
+                            Log.i("HTTP MODE: DEFAULT");
+                        }
+
+                        String accept_ranges = connection.getHeaderField("Accept-Ranges");
+                        if (!TextUtils.isEmpty(accept_ranges)
+                                && accept_ranges.equalsIgnoreCase("bytes")) {
+                            range = 0;
+                            Log.i("Accept-Ranges: bytes");
+                        }else{
+                            Log.i("Accept-Ranges: none");
+                        }
                         break;
                     case HttpURLConnection.HTTP_MOVED_TEMP:
                     case HttpURLConnection.HTTP_MOVED_PERM:
