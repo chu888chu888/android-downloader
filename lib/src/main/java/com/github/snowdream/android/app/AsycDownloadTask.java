@@ -64,10 +64,10 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
         HttpURLConnection connection = null;
 
         try {
-            long range = 0;
+            long range = file.length();
             long size = task.getSize();
-            long curSize = 0;
-            String contentType = "";
+            long curSize = range;
+            String contentType = task.getMimeType();
 
             File dir = file.getParentFile();
 
@@ -83,15 +83,13 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                 return null;
             }
 
-            if (task.getStatus() == DownloadStatus.STATUS_FINISHED && task.getSize() == range) {
+            if (task.getStatus() == DownloadStatus.STATUS_FINISHED && size == range) {
                 Log.i("The DownloadTask has already been downloaded.");
                 return task;
             }
 
             task.setStatus(DownloadStatus.STATUS_RUNNING);
 
-            range = file.length();
-            curSize = range;
 
             String urlString = task.getUrl();
             String cookies = null;
@@ -163,10 +161,12 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                 }
             }
 
-            size = connection.getContentLength();
-            contentType = connection.getContentType();
-
             if (range == 0) {
+                size = connection.getContentLength();
+                if (contentType != connection.getContentType()) {
+                    contentType = connection.getContentType();
+                }
+
                 task.setSize(size);
                 task.setStartTime(System.currentTimeMillis());
                 task.setMimeType(contentType);
@@ -203,6 +203,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                 Log.i("cur size:" + (curSize) + "    total size:" + (size) + "    cur progress:" + (progress));
 
                 if (isCancelled()) {
+                    task.setStatus(DownloadStatus.STATUS_STOPPED);
                     isFinishDownloading = false;
                     break;
                 }

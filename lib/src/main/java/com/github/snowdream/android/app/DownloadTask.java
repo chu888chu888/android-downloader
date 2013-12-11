@@ -17,10 +17,9 @@
 package com.github.snowdream.android.app;
 
 import android.content.Context;
-
+import android.text.TextUtils;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
@@ -128,14 +127,20 @@ public class DownloadTask extends Object {
         this.listener = task.listener;
     }
 
-    public void setDownloadTask(DownloadTask task) {
+    protected void setDownloadTask(DownloadTask task) {
         //this.context = task.context;
         this.startTime = task.startTime;
-        this.finishTime = task.finishTime;
+        //this.finishTime = task.finishTime;
         this.id = task.id;
-        this.mimeType = task.mimeType;
-        this.name = task.name;
-        this.path = task.path;
+        if (TextUtils.isEmpty(this.mimeType)) {
+            this.mimeType = task.mimeType;
+        }
+        if (TextUtils.isEmpty(this.name)) {
+            this.name = task.name;
+        }
+        if (TextUtils.isEmpty(this.path)) {
+            this.path = task.path;
+        }
         this.size = task.size;
         this.status = task.status;
         this.type = task.type;
@@ -243,15 +248,15 @@ public class DownloadTask extends Object {
     /**
      * Start the Task
      *
-     * @param context Context
+     * @param context  Context
      * @param listener DownloadListener
      */
     @SuppressWarnings({
             "rawtypes", "unchecked"
     })
-    protected void start(Context context,DownloadListener listener) {
+    protected void start(Context context, DownloadListener listener) {
         //Get context,which will be used to communicate with sqlite.
-        if (this.context == null && context != null){
+        if (this.context == null && context != null) {
             this.context = context;
         }
 
