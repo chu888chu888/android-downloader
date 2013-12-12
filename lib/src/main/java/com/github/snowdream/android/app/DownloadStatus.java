@@ -40,12 +40,7 @@ public class DownloadStatus {
      * The DownloadTask is stopped.
      */
     public static final int STATUS_STOPPED = 0x00000003;
-    
-    /**
-     * The DownloadTask is waiting to retry or resume.
-     */
-    public static final int STATUS_PAUSED = 0x00000004;
-    
+
     /**
      * The DownloadTask has successfully completed.
      */

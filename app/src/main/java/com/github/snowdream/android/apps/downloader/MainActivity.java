@@ -92,10 +92,8 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
         List<DownloadTask> list = new ArrayList<DownloadTask>();
 
         DownloadTask task = new DownloadTask(this);
-        task.setName("HDExplorer");
         task.setUrl("http://192.168.30.131:8080/snowdream/HDExplorer_0.1.3_signed.apk");
         task.setPath("/mnt/sdcard/HDExplorer_0.1.3_signed.apk");
-        task.setSize(469313);
         DownloadManager.add(task);
         list.add(task);
 
@@ -173,10 +171,7 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
                 });
                 break;
             case DownloadStatus.STATUS_RUNNING:
-                DownloadManager.pause(task);
-                break;
-            case DownloadStatus.STATUS_PAUSED:
-                DownloadManager.resume(task);
+                DownloadManager.stop(task);
                 break;
             default:
                 break;

@@ -269,18 +269,6 @@ public class DownloadTask extends Object {
         task.execute(this);
     }
 
-    /**
-     * Cancel the Task
-     *
-     * @param listener
-     */
-    @SuppressWarnings("rawtypes")
-    public void cancel(DownloadListener listener) {
-        if (task != null) {
-            task.cancel(false);
-        }
-    }
-
     @Override
     public int hashCode() {
         return url.hashCode();
@@ -295,5 +283,4 @@ public class DownloadTask extends Object {
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
     }
-
 }

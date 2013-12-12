@@ -119,9 +119,6 @@ public class DownloadManager {
                 case DownloadStatus.STATUS_RUNNING:
                     Log.i("The Task is already Running.");
                     break;
-                case DownloadStatus.STATUS_PAUSED:
-                    resume(task);
-                    break;
                 default:
                     if (listener != null) {
                         task.start(context, listener);
@@ -132,110 +129,6 @@ public class DownloadManager {
             ret = true;
         } catch (SQLException e) {
             e.printStackTrace();
-        }
-
-        return ret;
-    }
-
-    /**
-     * Pause Task<BR />
-     * if the task status is not DownloadStatus.STATUS_PAUSED or
-     * DownloadStatus.STATUS_RUNNING, then
-     * exceptions(DownloadException.OPERATION_NOT_VALID) will be thrown.
-     *
-     * @param task  DownloadTask
-     * @return
-     */
-    public static boolean pause(DownloadTask task) {
-        Log.i("Pause Task");
-
-        boolean ret = false;
-
-        if (task == null) {
-            return ret;
-        }
-
-        DownloadListener listener = task.getListener();
-        Context context = task.getContext();
-
-        if (context == null) {
-            OnError(context, listener, DownloadException.CONTEXT_NOT_VALID);
-            return ret;
-        }
-
-        switch (task.getStatus()) {
-            case DownloadStatus.STATUS_PAUSED:
-                ret = true;
-                Log.i("The Task is already Paused.");
-                break;
-            case DownloadStatus.STATUS_RUNNING:
-                task.setStatus(DownloadStatus.STATUS_PAUSED);
-
-                ISql iSql = new ISqlImpl(context);
-
-                try {
-                    iSql.updateDownloadTask(task);
-
-                    ret = true;
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-                break;
-            default:
-                OnError(context, listener, DownloadException.OPERATION_NOT_VALID);
-                break;
-        }
-
-        return ret;
-    }
-
-    /**
-     * Resume Task<BR />
-     * if the task status is not DownloadStatus.STATUS_PAUSED or
-     * DownloadStatus.STATUS_RUNNING, then
-     * errors(DownloadException.OPERATION_NOT_VALID) will be thrown.
-     *
-     * @param task  DownloadTask
-     * @return
-     */
-    public static boolean resume(DownloadTask task) {
-        Log.i("Resume Task");
-
-        boolean ret = false;
-
-        if (task == null) {
-            return ret;
-        }
-
-        DownloadListener listener = task.getListener();
-        Context context = task.getContext();
-
-        if (context == null) {
-            OnError(context, listener, DownloadException.CONTEXT_NOT_VALID);
-            return ret;
-        }
-
-        switch (task.getStatus()) {
-            case DownloadStatus.STATUS_RUNNING:
-                ret = true;
-                Log.i("The Task is already Running.");
-                break;
-            case DownloadStatus.STATUS_PAUSED:
-                task.setStatus(DownloadStatus.STATUS_RUNNING);
-
-                ISql iSql = new ISqlImpl(context);
-
-                try {
-                    iSql.updateDownloadTask(task);
-
-                    ret = true;
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-                break;
-            default:
-                OnError(context, listener, DownloadException.OPERATION_NOT_VALID);
-                break;
         }
 
         return ret;
@@ -273,19 +166,8 @@ public class DownloadManager {
                 ret = true;
                 Log.i("The Task is already Stopped.");
                 break;
-            case DownloadStatus.STATUS_PAUSED:
             case DownloadStatus.STATUS_RUNNING:
                 task.setStatus(DownloadStatus.STATUS_STOPPED);
-
-                ISql iSql = new ISqlImpl(context);
-
-                try {
-                    iSql.updateDownloadTask(task);
-
-                    ret = true;
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
                 break;
             default:
                 OnError(context, listener, DownloadException.OPERATION_NOT_VALID);
@@ -326,16 +208,6 @@ public class DownloadManager {
                 break;
             default:
                 task.setStatus(DownloadStatus.STATUS_DELETED);
-
-                ISql iSql = new ISqlImpl(context);
-
-                try {
-                    iSql.updateDownloadTask(task);
-
-                    ret = true;
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
                 break;
         }
 
