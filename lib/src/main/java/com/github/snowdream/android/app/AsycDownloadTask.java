@@ -67,6 +67,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
             long range = file.length();
             long size = task.getSize();
             long curSize = range;
+            String filename = task.getName();
             String contentType = task.getMimeType();
 
             File dir = file.getParentFile();
@@ -136,7 +137,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                         if (!TextUtils.isEmpty(accept_ranges)
                                 && accept_ranges.equalsIgnoreCase("bytes")) {
                             Log.i("Accept-Ranges: bytes");
-                        }else{
+                        } else {
                             range = 0;
                             Log.i("Accept-Ranges: none");
                         }
@@ -176,6 +177,23 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                     contentType = connection.getContentType();
                 }
 
+                //auto get filename
+                if (TextUtils.isEmpty(filename)) {
+                    String disposition = connection.getHeaderField("Content-Disposition");
+                    if (disposition != null) {
+                        // extracts file name from header field
+                        int index = disposition.indexOf("filename=");
+                        if (index > 0) {
+                            filename = disposition.substring(index + 10,
+                                    disposition.length() - 1);
+                        }
+                    } else {
+                        // extracts file name from URL
+                        filename = urlString.substring(urlString.lastIndexOf("/") + 1,
+                                urlString.length());
+                    }
+                }
+                task.setName(filename);
                 task.setSize(size);
                 task.setStartTime(System.currentTimeMillis());
                 task.setMimeType(contentType);
@@ -194,11 +212,6 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
             int progress = -1;
             boolean isFinishDownloading = true;
             while ((nRead = in.read(buffer, 0, 1024)) > 0) {
-                while (task.getStatus() == DownloadStatus.STATUS_PAUSED) {
-                    Log.i("Pause the DownloadTask,Sleeping...");
-                    Thread.sleep(500);
-                }
-
                 out.write(buffer, 0, nRead);
 
                 curSize += nRead;
@@ -217,8 +230,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                     break;
                 }
 
-                if ((task.getStatus() != DownloadStatus.STATUS_RUNNING)
-                        && (task.getStatus() != DownloadStatus.STATUS_PAUSED)) {
+                if (task.getStatus() != DownloadStatus.STATUS_RUNNING) {
                     isFinishDownloading = false;
                     break;
                 }
@@ -265,11 +277,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
             SendError(task, DownloadException.DOWNLOAD_TASK_FAILED);
 
             e.printStackTrace();
-        } catch (InterruptedException e) {
-            SendError(task, DownloadException.DOWNLOAD_TASK_FAILED);
-
-            e.printStackTrace();
-        } finally {
+        }finally {
             try {
                 if (in != null) {
                     in.close();
