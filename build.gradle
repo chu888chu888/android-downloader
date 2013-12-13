@@ -2,6 +2,9 @@ buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
+        maven{
+            url "file:///home/snowdream/workspace/git/mvn-repo/"
+        }
     }
 
     dependencies {
