@@ -16,6 +16,8 @@
 
 
 
+
+
 apply plugin: 'maven'
 apply plugin: 'signing'
 
@@ -23,6 +25,10 @@ configurations {
     archives {
         extendsFrom configurations.default
     }
+}
+
+def isReleaseBuild() {
+    return version.contains("SNAPSHOT") == false
 }
 
 def sonatypeRepositoryUrl

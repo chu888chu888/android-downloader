@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2013 Snowdream Mobile <yanghui1986527@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
 buildscript {
     repositories {
         mavenCentral()
@@ -5,7 +23,6 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:0.6.3'
-        classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.6.0'
     }
 }
 
@@ -28,31 +45,4 @@ allprojects {
     }
 
     apply from: rootProject.file('config/license.gradle')
-}
-
-/*
- * Copyright (C) 2013 Snowdream Mobile <yanghui1986527@gmail.com>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Task to generate a gradle wrapper.
- */
-task wrapper(type: Wrapper) {
-    gradleVersion = '1.8'
-}
-
-def isReleaseBuild() {
-    return version.contains("SNAPSHOT") == false
 }
