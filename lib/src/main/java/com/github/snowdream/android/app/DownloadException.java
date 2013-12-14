@@ -24,7 +24,6 @@ package com.github.snowdream.android.app;
  */
 public class DownloadException extends Exception {
     private int code = UNKNOWN;
-    private String message = "";
 
     /** serialVersionUID **/
     private static final long serialVersionUID = -3804737584048978515L;
@@ -55,18 +54,18 @@ public class DownloadException extends Exception {
     public static final int DOWNLOAD_TASK_FAILED = 11;
 
     public DownloadException(){
+        super(generateMessageFromCode(UNKNOWN));
         this.code = UNKNOWN;
-        generateMessageFromCode(code);
     }
 
     public DownloadException(int code) {
+        super(generateMessageFromCode(code));
         this.code = code;
-        generateMessageFromCode(code);
     }
 
     public DownloadException(int code,String message) {
+        super(message);
         this.code = code;
-        this.message = message;
     }
 
     public int getCode() {
@@ -77,22 +76,12 @@ public class DownloadException extends Exception {
         this.code = code;
     }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
     /**
      * Generage the error message with the code
      * @param code
      */
-    private void generateMessageFromCode(int code){
-        if (message != null && message != ""){
-            return;
-        }
+    private static String generateMessageFromCode(int code){
+        String message = null;
 
         switch (code){
             case DOWNLOAD_TASK_NOT_VALID:
@@ -112,5 +101,6 @@ public class DownloadException extends Exception {
                     message = "Unknown Error!";
                 break;
         }
+        return message;
     }
 }
