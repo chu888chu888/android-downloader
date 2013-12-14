@@ -1,18 +1,18 @@
-/*******************************************************************************
- * Copyright (C) 2013 Snowdream Mobile
+/*
+ * Copyright (C) 2013 Snowdream Mobile <yanghui1986527@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *         http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *******************************************************************************/
+ */
 
 package com.github.snowdream.android.apps.downloader;
 
@@ -23,13 +23,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
-
-import com.github.snowdream.android.app.DownloadListener;
-import com.github.snowdream.android.app.DownloadManager;
-import com.github.snowdream.android.app.DownloadStatus;
-import com.github.snowdream.android.app.DownloadTask;
+import com.github.snowdream.android.app.*;
 import com.github.snowdream.android.util.Log;
-
 import net.simonvt.menudrawer.MenuDrawer;
 
 import java.util.ArrayList;
@@ -50,8 +45,9 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.setPath("/mnt/sdcard/snowdream/log","log","log");
-        Log.setPolicy(Log.LOG_ERROR_TO_FILE);
+        Log.setPath("/mnt/sdcard/snowdream/log", "log", "log");
+        //Log.setPolicy(Log.LOG_ERROR_TO_FILE);
+        Log.setPolicy(Log.LOG_ALL_TO_FILE);
 
         //setContentView(R.layout.activity_main);
         mDrawer = MenuDrawer.attach(this);
@@ -96,7 +92,11 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
         task.setPath("/mnt/sdcard/HDExplorer_0.1.3_signed.apk");
         DownloadManager.add(task);
         list.add(task);
-
+        Log.d("TAG", "test", new DownloadException("snowdream"));
+        Log.v("TAG", "test", new DownloadException("snowdream"));
+        Log.i("TAG", "test", new DownloadException("snowdream"));
+        Log.w("TAG", "test", new DownloadException("snowdream"));
+        Log.e("TAG", "test", new DownloadException("snowdream"));
         DownloadTaskAdapter adapter = new DownloadTaskAdapter(this, list);
         setListAdapter(adapter);
     }
@@ -131,7 +131,7 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
             case DownloadStatus.STATUS_PENDING:
             case DownloadStatus.STATUS_FAILED:
             case DownloadStatus.STATUS_STOPPED:
-                DownloadManager.start(this,task, new DownloadListener<Integer, DownloadTask>() {
+                DownloadManager.start(this, task, new DownloadListener<Integer, DownloadTask>() {
                     @Override
                     public void onStart() {
                         super.onStart();
@@ -141,7 +141,7 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
                     @Override
                     public void onProgressUpdate(Integer... values) {
                         super.onProgressUpdate(values);
-                        ((DownloadTaskAdapter)getListAdapter()).notifyDataSetChanged();
+                        ((DownloadTaskAdapter) getListAdapter()).notifyDataSetChanged();
                         Log.i("onProgressUpdate");
                     }
 

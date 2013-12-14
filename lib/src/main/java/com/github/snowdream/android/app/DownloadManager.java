@@ -1,24 +1,23 @@
-/*******************************************************************************
- * Copyright (C) 2013 Snowdream Mobile
+/*
+ * Copyright (C) 2013 Snowdream Mobile <yanghui1986527@gmail.com>
  *
- * Licensed under the Apache License, Version 2.0 (the "License"){};
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *         http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *******************************************************************************/
+ */
 
 package com.github.snowdream.android.app;
 
 import android.app.Activity;
 import android.content.Context;
-
 import com.github.snowdream.android.app.dao.ISql;
 import com.github.snowdream.android.app.dao.ISqlImpl;
 import com.github.snowdream.android.util.Log;
@@ -35,7 +34,7 @@ public class DownloadManager {
     /**
      * Add Task
      *
-     * @param task  DownloadTask
+     * @param task DownloadTask
      * @return
      */
     public static boolean add(DownloadTask task) {
@@ -141,7 +140,7 @@ public class DownloadManager {
      * DownloadStatus.STATUS_RUNNING, then
      * exceptions(DownloadException.OPERATION_NOT_VALID) will be thrown.
      *
-     * @param task  DownloadTask
+     * @param task DownloadTask
      * @return
      */
     public static boolean stop(DownloadTask task) {
@@ -181,7 +180,7 @@ public class DownloadManager {
      * Delete Task <BR />
      * just set the task status to DownloadStatus.STATUS_DELETED
      *
-     * @param task  DownloadTask
+     * @param task DownloadTask
      * @return
      */
     public static boolean delete(DownloadTask task) {
@@ -218,7 +217,7 @@ public class DownloadManager {
      * Delete Task <BR />
      * delete the task ,and the file of the task too.
      *
-     * @param task  DownloadTask
+     * @param task DownloadTask
      * @return
      */
     public static boolean deleteforever(DownloadTask task) {
@@ -245,9 +244,9 @@ public class DownloadManager {
     /**
      * throw error
      *
-     * @param context Context
+     * @param context  Context
      * @param listener DownloadListener
-     * @param code code
+     * @param code     code
      */
     @SuppressWarnings("rawtypes")
     private static void OnError(Context context, final DownloadListener listener, final Integer code) {

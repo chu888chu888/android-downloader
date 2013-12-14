@@ -17,73 +17,47 @@
 package com.github.snowdream.android.app;
 
 
-/**
- * @author snowdream <yanghui1986527@gmail.com>
- * @date Sep 29, 2013
- * @version v1.0
- */
 public class DownloadException extends Exception {
-    private int code = UNKNOWN;
-
-    /** serialVersionUID **/
-    private static final long serialVersionUID = -3804737584048978515L;
-
-    /**
-     * Unknown Error
-     */
-    public static final int UNKNOWN = 0;
-
-    /**
-     * The task is not valid.
-     */
-    public static final int DOWNLOAD_TASK_NOT_VALID = 1;
-
     /**
      * The context is NULL.
      */
     public static final int CONTEXT_NOT_VALID = 2;
-    
-    /**
-     * the operation is not valid.
-     */
-    public static final int OPERATION_NOT_VALID = 10;
-    
     /**
      * The task failed.
      */
     public static final int DOWNLOAD_TASK_FAILED = 11;
+    /**
+     * The task is not valid.
+     */
+    public static final int DOWNLOAD_TASK_NOT_VALID = 1;
+    /**
+     * the operation is not valid.
+     */
+    public static final int OPERATION_NOT_VALID = 10;
+    /**
+     * Unknown Error
+     */
+    public static final int UNKNOWN = 0;
+    /**
+     * serialVersionUID *
+     */
+    private static final long serialVersionUID = -3804737584048978515L;
+    private int code = UNKNOWN;
 
-    public DownloadException(){
+    public DownloadException() {
         super(generateMessageFromCode(UNKNOWN));
         this.code = UNKNOWN;
     }
 
-    public DownloadException(int code) {
-        super(generateMessageFromCode(code));
-        this.code = code;
-    }
-
-    public DownloadException(int code,String message) {
-        super(message);
-        this.code = code;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
-    }
-
     /**
      * Generage the error message with the code
-     * @param code
+     *
+     * @param code code
      */
-    private static String generateMessageFromCode(int code){
-        String message = null;
+    private static String generateMessageFromCode(int code) {
+        String message;
 
-        switch (code){
+        switch (code) {
             case DOWNLOAD_TASK_NOT_VALID:
                 message = "The DownloadTask is null or not valid!";
                 break;
@@ -98,9 +72,32 @@ public class DownloadException extends Exception {
                 break;
             case UNKNOWN:
             default:
-                    message = "Unknown Error!";
+                message = "Unknown Error!";
                 break;
         }
         return message;
+    }
+
+    public DownloadException(int code) {
+        super(generateMessageFromCode(code));
+        this.code = code;
+    }
+
+    public DownloadException(String message) {
+        super(message);
+        this.code = UNKNOWN;
+    }
+
+    public DownloadException(int code, String message) {
+        super(message);
+        this.code = code;
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
     }
 }
