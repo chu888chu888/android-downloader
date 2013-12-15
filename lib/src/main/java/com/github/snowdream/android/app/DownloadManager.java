@@ -30,14 +30,39 @@ import java.sql.SQLException;
  * @version v1.0
  * @date Sep 29, 2013
  */
-public class DownloadManager {
+public class DownloadManager
+
+    /**
+     * throw error
+     *
+     * @param context  Context
+     * @param listener DownloadListener
+     * @param code     code
+     */
+    @SuppressWarnings("rawtypes")
+    private static void OnError(Context context, final DownloadListener listener, final Integer code) {
+        if (context == null || !(context instanceof Activity)) {
+            Log.w("The context is null or invalid!");
+            return;
+        }
+
+        ((Activity) context).runOnUiThread(new Runnable() {
+
+            public void run() {
+                if (listener != null) {
+                    listener.onError(new DownloadException(code));
+                }
+            }
+        });
+    }
+
     /**
      * Add Task
      *
      * @param task DownloadTask
      * @return
      */
-    public static boolean add(DownloadTask task) {
+    public static boolean add(DownloadTask task, DownloadListener listener) {
         Log.i("Add Task");
 
         boolean ret = false;
@@ -69,6 +94,71 @@ public class DownloadManager {
             ret = true;
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+
+        return ret;
+    }
+
+    /**
+     * Delete Task <BR />
+     * just set the task status to DownloadStatus.STATUS_DELETED
+     *
+     * @param task DownloadTask
+     * @return
+     */
+    public static boolean delete(DownloadTask task) {
+        Log.i("Delete Task");
+
+        boolean ret = false;
+
+        if (task == null) {
+            return ret;
+        }
+
+        DownloadListener listener = task.getListener();
+        Context context = task.getContext();
+
+        if (context == null) {
+            OnError(context, listener, DownloadException.CONTEXT_NOT_VALID);
+            return ret;
+        }
+
+        switch (task.getStatus()) {
+            case DownloadStatus.STATUS_DELETED:
+                ret = true;
+                Log.i("The Task is already Deleted.");
+                break;
+            default:
+                task.setStatus(DownloadStatus.STATUS_DELETED);
+                break;
+        }
+
+        return ret;
+    }
+
+    /**
+     * Delete Task <BR />
+     * delete the task ,and the file of the task too.
+     *
+     * @param task DownloadTask
+     * @return
+     */
+    public static boolean deleteforever(DownloadTask task) {
+        Log.i("Delete Task forever");
+
+        boolean ret = false;
+
+        if (task == null) {
+            return ret;
+        }
+
+        // delete the file
+        if (delete(task)) {
+            File file = new File(task.getPath());
+
+            if (file.exists()) {
+                ret = file.delete();
+            }
         }
 
         return ret;
@@ -174,94 +264,5 @@ public class DownloadManager {
         }
 
         return ret;
-    }
-
-    /**
-     * Delete Task <BR />
-     * just set the task status to DownloadStatus.STATUS_DELETED
-     *
-     * @param task DownloadTask
-     * @return
-     */
-    public static boolean delete(DownloadTask task) {
-        Log.i("Delete Task");
-
-        boolean ret = false;
-
-        if (task == null) {
-            return ret;
-        }
-
-        DownloadListener listener = task.getListener();
-        Context context = task.getContext();
-
-        if (context == null) {
-            OnError(context, listener, DownloadException.CONTEXT_NOT_VALID);
-            return ret;
-        }
-
-        switch (task.getStatus()) {
-            case DownloadStatus.STATUS_DELETED:
-                ret = true;
-                Log.i("The Task is already Deleted.");
-                break;
-            default:
-                task.setStatus(DownloadStatus.STATUS_DELETED);
-                break;
-        }
-
-        return ret;
-    }
-
-    /**
-     * Delete Task <BR />
-     * delete the task ,and the file of the task too.
-     *
-     * @param task DownloadTask
-     * @return
-     */
-    public static boolean deleteforever(DownloadTask task) {
-        Log.i("Delete Task forever");
-
-        boolean ret = false;
-
-        if (task == null) {
-            return ret;
-        }
-
-        // delete the file
-        if (delete(task)) {
-            File file = new File(task.getPath());
-
-            if (file.exists()) {
-                ret = file.delete();
-            }
-        }
-
-        return ret;
-    }
-
-    /**
-     * throw error
-     *
-     * @param context  Context
-     * @param listener DownloadListener
-     * @param code     code
-     */
-    @SuppressWarnings("rawtypes")
-    private static void OnError(Context context, final DownloadListener listener, final Integer code) {
-        if (context == null || !(context instanceof Activity)) {
-            Log.w("The context is null or invalid!");
-            return;
-        }
-
-        ((Activity) context).runOnUiThread(new Runnable() {
-
-            public void run() {
-                if (listener != null) {
-                    listener.onError(new DownloadException(code));
-                }
-            }
-        });
     }
 }

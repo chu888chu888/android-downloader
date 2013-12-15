@@ -25,4 +25,12 @@ import com.github.snowdream.android.util.concurrent.TaskListener;
  */
 @SuppressWarnings("hiding")
 public class DownloadListener<Integer, DownloadTask> extends TaskListener<Integer, DownloadTask> {
+    /**
+     * The download task has been added to the sqlite.
+     *
+     * operation of UI allowed.
+     *
+     * @param task the download task which has been added to the sqlite.
+     */
+    public void onAdd(DownloadTask task) {};
 }
