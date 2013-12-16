@@ -21,7 +21,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
-import android.webkit.URLUtil;
 import com.github.snowdream.android.app.dao.ISql;
 import com.github.snowdream.android.app.dao.ISqlImpl;
 import com.github.snowdream.android.util.Log;
@@ -35,9 +34,10 @@ import java.net.URL;
 import java.sql.SQLException;
 
 public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadTask> {
-    private static final InternalHandler sHandler = new InternalHandler();
+
     private static final int MESSAGE_POST_ERROR = 0x1;
 
+    private static final int MESSAGE_POST_ADD = 0x2;
     /**
      * http default
      */
@@ -46,11 +46,81 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
      * http trunked
      */
     private static final int MODE_TRUNKED = 0x2;
-
+    private static final String STORE_PATH = "/mnt/snowdream/android-downloader/";
+    private static final InternalHandler sHandler = new InternalHandler();
+    /**
+     * just get head detail message
+     */
+    private boolean isOnlyGetHead = false;
     private int mode = MODE_DEFAULT;
 
-    public AsycDownloadTask(DownloadListener<Integer, DownloadTask> listener) {
+    public AsycDownloadTask(DownloadListener<Integer, DownloadTask> listener, boolean isOnlyGetHead) {
         super(listener);
+        this.isOnlyGetHead = isOnlyGetHead;
+    }
+
+    /**
+     * throw error
+     *
+     * @param task task
+     * @param code The code of the exception
+     */
+    private void OnError(DownloadTask task, Integer code) {
+        if (listener != null) {
+            listener.onError(new DownloadException(code));
+        }
+    }
+
+    /**
+     * inform Add
+     *
+     * @param task task
+     */
+    private void OnAdd(DownloadTask task) {
+        if (listener != null && listener instanceof  DownloadListener) {
+            ((DownloadListener)listener).onAdd(task);
+        }
+    }
+
+    /**
+     * Update the status of the DownloadTask,and save it to the sqlite
+     *
+     * @param task
+     * @param status
+     */
+    private void SaveDownloadTask(DownloadTask task, int status) {
+        Context context = task.getContext();
+
+        if (context == null) {
+            return;
+        }
+
+        task.setStatus(status);
+
+        ISql iSql = new ISqlImpl(context);
+
+        try {
+            iSql.addDownloadTask(task);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void SendError(DownloadTask task, Integer code) {
+        Log.e("Errors happen while downloading.");
+        SaveDownloadTask(task, DownloadStatus.STATUS_FAILED);
+
+        sHandler.obtainMessage(
+                MESSAGE_POST_ERROR,
+                new AsyncTaskResult(this, task,
+                        code)).sendToTarget();
+    }
+
+    private void SendAdd(DownloadTask task) {
+        sHandler.obtainMessage(
+                MESSAGE_POST_ADD,
+                new AsyncTaskResult(this, task,
+                        -1)).sendToTarget();
     }
 
     /**
@@ -65,7 +135,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
 
         DownloadTask task = tasks[0];
 
-        if (task == null || task.getUrl() == null || !URLUtil.isValidUrl(task.getUrl())) {
+        if (task == null || task.isValid()) {
             SendError(task, DownloadException.DOWNLOAD_TASK_NOT_VALID);
 
             Log.e("The task is not valid,or the url of the task is not valid.");
@@ -86,27 +156,12 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
             String filename = task.getName();
             String contentType = task.getMimeType();
 
-            File dir = file.getParentFile();
-
-            if (!dir.exists() && !dir.mkdirs()) {
-                SendError(task, DownloadException.DOWNLOAD_TASK_FAILED);
-                Log.e("The directory of the file can not be created!");
-                return null;
-            }
-
-            if (!file.exists() && !file.createNewFile() && !file.canWrite()) {
-                SendError(task, DownloadException.DOWNLOAD_TASK_FAILED);
-                Log.e("The file can not be created!");
-                return null;
-            }
-
             if (task.getStatus() == DownloadStatus.STATUS_FINISHED && size == range) {
                 Log.i("The DownloadTask has already been downloaded.");
                 return task;
             }
 
             task.setStatus(DownloadStatus.STATUS_RUNNING);
-
 
             String urlString = task.getUrl();
             String cookies = null;
@@ -188,9 +243,13 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
             }
 
             if (range == 0) {
+                //set the whole file size
                 size = connection.getContentLength();
+                task.setSize(size);
+
                 if (contentType != connection.getContentType()) {
                     contentType = connection.getContentType();
+                    task.setMimeType(contentType);
                 }
 
                 //auto get filename
@@ -208,12 +267,35 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                         filename = urlString.substring(urlString.lastIndexOf("/") + 1,
                                 urlString.length());
                     }
+                    task.setName(filename);
                 }
-                task.setName(filename);
-                task.setSize(size);
+
+                //auto get filepath
+                if (TextUtils.isEmpty(path)) {
+                    path = STORE_PATH + filename;
+
+                    file = new File(path);
+
+                    task.setPath(path);
+                }
+
                 task.setStartTime(System.currentTimeMillis());
-                task.setMimeType(contentType);
+
                 SaveDownloadTask(task, task.getStatus());
+                Log.i("The Task is stored in the sqlite.");
+
+                if (isOnlyGetHead) {
+                    SendAdd(task);
+                    return null;
+                }
+            }
+
+            File dir = file.getParentFile();
+
+            if (!dir.exists() && !dir.mkdirs()) {
+                SendError(task, DownloadException.DOWNLOAD_TASK_FAILED);
+                Log.e("The directory of the file can not be created!");
+                return null;
             }
 
             Log.i("DownloadTask " + task);
@@ -313,49 +395,17 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
         return null;
     }
 
-    private void SendError(DownloadTask task, Integer code) {
-        Log.e("Errors happen while downloading.");
-        SaveDownloadTask(task, DownloadStatus.STATUS_FAILED);
+    private static class AsyncTaskResult {
+        final Integer mData;
+        final DownloadTask mDownloadTask;
+        @SuppressWarnings("rawtypes")
+        final AsyncTask mTask;
 
-        sHandler.obtainMessage(
-                MESSAGE_POST_ERROR,
-                new AsyncTaskResult(this, task,
-                        code)).sendToTarget();
-    }
-
-    /**
-     * throw error
-     *
-     * @param task task
-     * @param code The code of the exception
-     */
-    private void OnError(DownloadTask task, Integer code) {
-        if (listener != null) {
-            listener.onError(new DownloadException(code));
-        }
-    }
-
-    /**
-     * Update the status of the DownloadTask,and save it to the sqlite
-     *
-     * @param task
-     * @param status
-     */
-    private void SaveDownloadTask(DownloadTask task, int status) {
-        Context context = task.getContext();
-
-        if (context == null) {
-            return;
-        }
-
-        task.setStatus(status);
-
-        ISql iSql = new ISqlImpl(context);
-
-        try {
-            iSql.updateDownloadTask(task);
-        } catch (SQLException e) {
-            e.printStackTrace();
+        AsyncTaskResult(@SuppressWarnings("rawtypes")
+                        AsyncTask task, DownloadTask downloadtask, Integer data) {
+            mTask = task;
+            mData = data;
+            mDownloadTask = downloadtask;
         }
     }
 
@@ -373,23 +423,12 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                 case MESSAGE_POST_ERROR:
                     ((AsycDownloadTask) result.mTask).OnError(result.mDownloadTask, result.mData);
                     break;
+                case MESSAGE_POST_ADD:
+                    ((AsycDownloadTask) result.mTask).OnAdd(result.mDownloadTask);
+                    break;
                 default:
                     break;
             }
-        }
-    }
-
-    private static class AsyncTaskResult {
-        @SuppressWarnings("rawtypes")
-        final AsyncTask mTask;
-        final Integer mData;
-        final DownloadTask mDownloadTask;
-
-        AsyncTaskResult(@SuppressWarnings("rawtypes")
-                        AsyncTask task, DownloadTask downloadtask, Integer data) {
-            mTask = task;
-            mData = data;
-            mDownloadTask = downloadtask;
         }
     }
 }

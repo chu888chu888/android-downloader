@@ -31,16 +31,24 @@ import java.sql.SQLException;
  * @date Sep 29, 2013
  */
 public class DownloadManager {
+    Context context = null;
+
+    private DownloadManager() {
+    }
+
+    public DownloadManager(Context context) {
+        this.context = context;
+    }
 
     /**
-     * throw error
+     * deal with the result
      *
-     * @param context  Context
+     * @param message  POST_MESSAGE
      * @param listener DownloadListener
      * @param code     code
      */
     @SuppressWarnings("rawtypes")
-    private static void OnError(Context context, final DownloadListener listener, final Integer code) {
+    private void OnResult(final POST_MESSAGE message, final DownloadTask task, final DownloadListener listener, final Integer code) {
         if (context == null || !(context instanceof Activity)) {
             Log.w("The context is null or invalid!");
             return;
@@ -50,7 +58,28 @@ public class DownloadManager {
 
             public void run() {
                 if (listener != null) {
-                    listener.onError(new DownloadException(code));
+                    return;
+                }
+
+                switch (message) {
+                    case ADD:
+                        listener.onAdd(task);
+                        break;
+                    case DELETE:
+                        listener.onDelete(task);
+                        break;
+                    case START:
+                        listener.onStart();
+                        break;
+                    case FINISH:
+                        listener.onFinish();
+                        break;
+                    case STOP:
+                        listener.onStop(task);
+                        break;
+                    case ERROR:
+                        listener.onError(new DownloadException(code));
+                        break;
                 }
             }
         });
@@ -62,41 +91,39 @@ public class DownloadManager {
      * @param task DownloadTask
      * @return
      */
-    public static boolean add(DownloadTask task, DownloadListener listener) {
+    public void add(DownloadTask task, DownloadListener listener) {
         Log.i("Add Task");
 
-        boolean ret = false;
-
-        if (task == null) {
-            return ret;
+        if (task == null || !task.isValid()) {
+            OnResult(POST_MESSAGE.ERROR, task, listener, DownloadException.DOWNLOAD_TASK_NOT_VALID);
+            return;
         }
 
-        Context context = task.getContext();
-
-        if (context == null) {
-            return ret;
+        if (task.getContext() == null) {
+            task.setContext(context);
         }
 
         ISql iSql = new ISqlImpl(context);
-
         DownloadTask temptask = null;
 
         try {
             temptask = iSql.queryDownloadTask(task);
 
-            if (temptask == null) {
-                iSql.addDownloadTask(task);
-                Log.i("The Task is stored in the sqlite.");
+            if (temptask == null || !temptask.isValid() || !temptask.isComplete()) {
+                if (task.isComplete()) {
+                    iSql.addDownloadTask(task);
+                    OnResult(POST_MESSAGE.ADD, task, listener, -1);
+                    Log.i("The Task is stored in the sqlite.");
+                } else {
+                    task.start(context, listener, true);
+                }
             } else {
+                OnResult(POST_MESSAGE.ADD, task, listener, -1);
                 Log.i("The Task is already stored in the sqlite.");
             }
-
-            ret = true;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        return ret;
     }
 
     /**
@@ -106,34 +133,28 @@ public class DownloadManager {
      * @param task DownloadTask
      * @return
      */
-    public static boolean delete(DownloadTask task) {
+    public void delete(DownloadTask task, DownloadListener listener) {
         Log.i("Delete Task");
 
-        boolean ret = false;
-
-        if (task == null) {
-            return ret;
+        if (task == null || !task.isValid()) {
+            OnResult(POST_MESSAGE.ERROR, task, listener, DownloadException.DOWNLOAD_TASK_NOT_VALID);
+            return;
         }
 
-        DownloadListener listener = task.getListener();
-        Context context = task.getContext();
-
-        if (context == null) {
-            OnError(context, listener, DownloadException.CONTEXT_NOT_VALID);
-            return ret;
+        if (task.getContext() == null) {
+            task.setContext(context);
         }
 
         switch (task.getStatus()) {
             case DownloadStatus.STATUS_DELETED:
-                ret = true;
+                OnResult(POST_MESSAGE.DELETE, task, listener, -1);
                 Log.i("The Task is already Deleted.");
                 break;
             default:
                 task.setStatus(DownloadStatus.STATUS_DELETED);
+                OnResult(POST_MESSAGE.DELETE, task, listener, -1);
                 break;
         }
-
-        return ret;
     }
 
     /**
@@ -143,25 +164,30 @@ public class DownloadManager {
      * @param task DownloadTask
      * @return
      */
-    public static boolean deleteforever(DownloadTask task) {
+    public void deleteforever(DownloadTask task, DownloadListener listener) {
         Log.i("Delete Task forever");
 
-        boolean ret = false;
-
-        if (task == null) {
-            return ret;
+        if (task == null || !task.isValid()) {
+            OnResult(POST_MESSAGE.ERROR, task, listener, DownloadException.DOWNLOAD_TASK_NOT_VALID);
+            return;
         }
 
-        // delete the file
-        if (delete(task)) {
+        if (task.getContext() == null) {
+            task.setContext(context);
+        }
+
+        ISql iSql = new ISqlImpl(context);
+        try {
+            iSql.deleteDownloadTask(task);
             File file = new File(task.getPath());
 
             if (file.exists()) {
-                ret = file.delete();
+                file.delete();
+                OnResult(POST_MESSAGE.DELETE, task, listener, -1);
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-
-        return ret;
     }
 
     /**
@@ -172,23 +198,18 @@ public class DownloadManager {
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public static boolean start(Context context, DownloadTask task, DownloadListener listener) {
+    public boolean start(DownloadTask task, DownloadListener listener) {
         Log.i("Start Task");
 
         boolean ret = false;
 
         if (task == null) {
-            OnError(context, listener, DownloadException.DOWNLOAD_TASK_NOT_VALID);
+            OnResult(POST_MESSAGE.ERROR, task, listener, DownloadException.DOWNLOAD_TASK_NOT_VALID);
             return ret;
-        }
-
-        if (context != null) {
-            task.setContext(context);
         }
 
         if (task.getContext() == null) {
-            OnError(context, listener, DownloadException.CONTEXT_NOT_VALID);
-            return ret;
+            task.setContext(context);
         }
 
         ISql iSql = new ISqlImpl(context);
@@ -199,18 +220,20 @@ public class DownloadManager {
             temptask = iSql.queryDownloadTask(task);
 
             if (temptask == null) {
-                add(task);
+                add(task, listener);
             } else if (!temptask.equals(task)) {
                 task.setDownloadTask(temptask);
             }
 
             switch (task.getStatus()) {
                 case DownloadStatus.STATUS_RUNNING:
+                    OnResult(POST_MESSAGE.START, task, listener, -1);
+                    OnResult(POST_MESSAGE.FINISH, task, listener, -1);
                     Log.i("The Task is already Running.");
                     break;
                 default:
                     if (listener != null) {
-                        task.start(context, listener);
+                        task.start(context, listener, false);
                     }
                     break;
             }
@@ -233,36 +256,34 @@ public class DownloadManager {
      * @param task DownloadTask
      * @return
      */
-    public static boolean stop(DownloadTask task) {
+    public void stop(DownloadTask task, DownloadListener listener) {
         Log.i("Stop Task");
 
-        boolean ret = false;
-
         if (task == null) {
-            return ret;
+            OnResult(POST_MESSAGE.ERROR, task, listener, DownloadException.DOWNLOAD_TASK_NOT_VALID);
+            return;
         }
 
-        DownloadListener listener = task.getListener();
-        Context context = task.getContext();
-
-        if (context == null) {
-            OnError(context, listener, DownloadException.CONTEXT_NOT_VALID);
-            return ret;
+        if (task.getContext() == null) {
+            task.setContext(context);
         }
 
         switch (task.getStatus()) {
             case DownloadStatus.STATUS_STOPPED:
-                ret = true;
+                OnResult(POST_MESSAGE.STOP, task, listener, -1);
                 Log.i("The Task is already Stopped.");
                 break;
             case DownloadStatus.STATUS_RUNNING:
+                OnResult(POST_MESSAGE.STOP, task, listener, -1);
                 task.setStatus(DownloadStatus.STATUS_STOPPED);
                 break;
             default:
-                OnError(context, listener, DownloadException.OPERATION_NOT_VALID);
+                OnResult(POST_MESSAGE.ERROR, task, listener, DownloadException.DOWNLOAD_TASK_NOT_VALID);
                 break;
         }
+    }
 
-        return ret;
+    private enum POST_MESSAGE {
+        ADD, DELETE, ERROR, START, STOP, FINISH
     }
 }

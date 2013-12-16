@@ -276,7 +276,7 @@ public class DownloadTask extends Object {
     @SuppressWarnings({
             "rawtypes", "unchecked"
     })
-    protected void start(Context context, DownloadListener listener) {
+    protected void start(Context context, DownloadListener listener,boolean isOnlyGetHead) {
         //Get context,which will be used to communicate with sqlite.
         if (this.context == null && context != null) {
             this.context = context;
@@ -287,7 +287,7 @@ public class DownloadTask extends Object {
             task = null;
         }
 
-        task = new AsycDownloadTask(listener);
+        task = new AsycDownloadTask(listener,isOnlyGetHead);
         task.execute(this);
     }
 }
