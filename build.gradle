@@ -43,6 +43,4 @@ allprojects {
     tasks.withType(JavaCompile) {
         options.encoding = "UTF-8"
     }
-
-    apply from: rootProject.file('config/license.gradle')
 }
