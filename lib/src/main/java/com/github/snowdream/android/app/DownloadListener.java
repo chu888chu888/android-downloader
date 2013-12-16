@@ -27,10 +27,13 @@ import com.github.snowdream.android.util.concurrent.TaskListener;
 public class DownloadListener<Integer, DownloadTask> extends TaskListener<Integer, DownloadTask> {
     /**
      * The download task has been added to the sqlite.
-     *
+     * <p/>
      * operation of UI allowed.
      *
      * @param task the download task which has been added to the sqlite.
      */
-    public void onAdd(DownloadTask task) {};
+    public void onAdd(DownloadTask task) {
+    }
+
+    ;
 }

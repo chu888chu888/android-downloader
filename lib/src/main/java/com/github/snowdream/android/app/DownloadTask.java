@@ -18,6 +18,7 @@ package com.github.snowdream.android.app;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.webkit.URLUtil;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -31,74 +32,62 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  */
 @DatabaseTable(tableName = "downloadtask")
 public class DownloadTask extends Object {
-    /**
-     * id
-     */
-    @DatabaseField(generatedId = true, canBeNull = false)
-    private int id = 0;
-
-    /**
-     * url
-     */
-    @DatabaseField(canBeNull = false)
-    private String url = "";
-
-    /**
-     * name
-     */
-    @DatabaseField
-    private String name = "";
-
-    /**
-     * total size
-     */
-    @DatabaseField
-    private long size = 0;
-
-    /**
-     * download status
-     */
-    @DatabaseField
-    private int status = DownloadStatus.STATUS_PENDING;
-
-    /**
-     * the time of start downloading
-     */
-    @DatabaseField
-    private long startTime = 0;
-
+    @DatabaseField(persisted = false)
+    private Context context = null;
     /**
      * the time of finish downloading
      */
     @DatabaseField
     private long finishTime = 0;
-
     /**
-     * type
+     * id
      */
-    @DatabaseField
-    private int type = DownloadType.TYPE_UNKNOWN;
-
+    @DatabaseField(generatedId = true, canBeNull = false)
+    private int id = 0;
+    @DatabaseField(persisted = false)
+    private DownloadListener listener = null;
     /**
      * mimetype
      */
     @DatabaseField
     private String mimeType = "";
-
+    /**
+     * name
+     */
+    @DatabaseField
+    private String name = "";
     /**
      * the save path on the sdcard
      */
     @DatabaseField(canBeNull = false)
     private String path = "";
-
+    /**
+     * total size
+     */
+    @DatabaseField
+    private long size = 0;
+    /**
+     * the time of start downloading
+     */
+    @DatabaseField
+    private long startTime = 0;
+    /**
+     * download status
+     */
+    @DatabaseField
+    private int status = DownloadStatus.STATUS_PENDING;
     @DatabaseField(persisted = false)
     private AsycDownloadTask task = null;
-
-    @DatabaseField(persisted = false)
-    private Context context = null;
-
-    @DatabaseField(persisted = false)
-    private DownloadListener listener = null;
+    /**
+     * type
+     */
+    @DatabaseField
+    private int type = DownloadType.TYPE_UNKNOWN;
+    /**
+     * url
+     */
+    @DatabaseField(canBeNull = false)
+    private String url = "";
 
     @SuppressWarnings("unused")
     private DownloadTask() {
@@ -127,6 +116,135 @@ public class DownloadTask extends Object {
         this.listener = task.listener;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return url.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
+
+    public Context getContext() {
+        return context;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    public long getFinishTime() {
+        return finishTime;
+    }
+
+    public void setFinishTime(long finishTime) {
+        this.finishTime = finishTime;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public DownloadListener getListener() {
+        return listener;
+    }
+
+    public void setListener(DownloadListener listener) {
+        this.listener = listener;
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    /**
+     * url, name and path is not empty.
+     *
+     * @return true is valid,otherwise not.
+     */
+    public boolean isComplete() {
+        return !TextUtils.isEmpty(url) && !TextUtils.isEmpty(name) && !TextUtils.isEmpty(path);
+    }
+
+    /**
+     * Check whether the Task is valid.
+     *
+     * @return true is valid,otherwise not.
+     */
+    public boolean isValid() {
+        return URLUtil.isNetworkUrl(url);
+    }
+
     protected void setDownloadTask(DownloadTask task) {
         //this.context = task.context;
         this.startTime = task.startTime;
@@ -147,102 +265,6 @@ public class DownloadTask extends Object {
         this.url = task.url;
         //this.task = task.task;
         //this.listener = task.listener;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public long getSize() {
-        return size;
-    }
-
-    public void setSize(long size) {
-        this.size = size;
-    }
-
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
-    }
-
-    public long getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(long startTime) {
-        this.startTime = startTime;
-    }
-
-    public long getFinishTime() {
-        return finishTime;
-    }
-
-    public void setFinishTime(long finishTime) {
-        this.finishTime = finishTime;
-    }
-
-    public int getType() {
-        return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
-    }
-
-    public String getMimeType() {
-        return mimeType;
-    }
-
-    public void setMimeType(String mimeType) {
-        this.mimeType = mimeType;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public Context getContext() {
-        return context;
-    }
-
-    public void setContext(Context context) {
-        this.context = context;
-    }
-
-    public DownloadListener getListener() {
-        return listener;
-    }
-
-    public void setListener(DownloadListener listener) {
-        this.listener = listener;
     }
 
     /**
@@ -267,20 +289,5 @@ public class DownloadTask extends Object {
 
         task = new AsycDownloadTask(listener);
         task.execute(this);
-    }
-
-    @Override
-    public int hashCode() {
-        return url.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return super.equals(obj);
-    }
-
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this);
     }
 }

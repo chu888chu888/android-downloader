@@ -30,7 +30,7 @@ import java.sql.SQLException;
  * @version v1.0
  * @date Sep 29, 2013
  */
-public class DownloadManager
+public class DownloadManager {
 
     /**
      * throw error
