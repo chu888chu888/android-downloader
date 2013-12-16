@@ -93,7 +93,7 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
         DownloadTask task = new DownloadTask(this);
         task.setUrl("http://192.168.30.131:8080/snowdream/HDExplorer_0.1.3_signed.apk");
         task.setPath("/mnt/sdcard/HDExplorer_0.1.3_signed.apk");
-        downloadManager.add(task,listener);
+        downloadManager.add(task, listener);
         Log.d("TAG", "test", new DownloadException("snowdream"));
         Log.v("TAG", "test", new DownloadException("snowdream"));
         Log.i("TAG", "test", new DownloadException("snowdream"));
@@ -103,7 +103,7 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
         setListAdapter(adapter);
     }
 
-    private DownloadListener listener  = new DownloadListener<Integer, DownloadTask>() {
+    private DownloadListener listener = new DownloadListener<Integer, DownloadTask>() {
         /**
          * The download task has been added to the sqlite.
          * <p/>
@@ -240,10 +240,10 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
             case DownloadStatus.STATUS_PENDING:
             case DownloadStatus.STATUS_FAILED:
             case DownloadStatus.STATUS_STOPPED:
-                downloadManager.start(task,listener);
+                downloadManager.start(task, listener);
                 break;
             case DownloadStatus.STATUS_RUNNING:
-                downloadManager.stop(task,listener);
+                downloadManager.stop(task, listener);
                 break;
             default:
                 break;
