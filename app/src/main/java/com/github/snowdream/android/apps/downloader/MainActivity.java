@@ -41,6 +41,8 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
     private MenuAdapter mAdapter;
     private ListView mList;
     private int mActivePosition = 0;
+    private DownloadManager downloadManager = null;
+    private List<DownloadTask> list = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,13 +87,13 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
             items1.add("MenuItem " + i);
         }
 
-        List<DownloadTask> list = new ArrayList<DownloadTask>();
+        downloadManager = new DownloadManager(this);
+        list = new ArrayList<DownloadTask>();
 
         DownloadTask task = new DownloadTask(this);
         task.setUrl("http://192.168.30.131:8080/snowdream/HDExplorer_0.1.3_signed.apk");
         task.setPath("/mnt/sdcard/HDExplorer_0.1.3_signed.apk");
-        DownloadManager.add(task);
-        list.add(task);
+        downloadManager.add(task,listener);
         Log.d("TAG", "test", new DownloadException("snowdream"));
         Log.v("TAG", "test", new DownloadException("snowdream"));
         Log.i("TAG", "test", new DownloadException("snowdream"));
@@ -100,6 +102,113 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
         DownloadTaskAdapter adapter = new DownloadTaskAdapter(this, list);
         setListAdapter(adapter);
     }
+
+    private DownloadListener listener  = new DownloadListener<Integer, DownloadTask>() {
+        /**
+         * The download task has been added to the sqlite.
+         * <p/>
+         * operation of UI allowed.
+         *
+         * @param downloadTask the download task which has been added to the sqlite.
+         */
+        @Override
+        public void onAdd(DownloadTask downloadTask) {
+            super.onAdd(downloadTask);
+            Log.i("onAdd()");
+            list.add(downloadTask);
+        }
+
+        /**
+         * The download task has been delete from the sqlite
+         * <p/>
+         * operation of UI allowed.
+         *
+         * @param downloadTask the download task which has been deleted to the sqlite.
+         */
+        @Override
+        public void onDelete(DownloadTask downloadTask) {
+            super.onDelete(downloadTask);
+            Log.i("onDelete()");
+        }
+
+        /**
+         * The download task is stop
+         * <p/>
+         * operation of UI allowed.
+         *
+         * @param downloadTask the download task which has been stopped.
+         */
+        @Override
+        public void onStop(DownloadTask downloadTask) {
+            super.onStop(downloadTask);
+            Log.i("onStop()");
+        }
+
+        /**
+         * Runs on the UI thread before doInBackground(Params...).
+         */
+        @Override
+        public void onStart() {
+            super.onStart();
+            Log.i("onStart()");
+        }
+
+        /**
+         * Runs on the UI thread after publishProgress(Progress...) is invoked. The
+         * specified values are the values passed to publishProgress(Progress...).
+         *
+         * @param values The values indicating progress.
+         */
+        @Override
+        public void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            ((DownloadTaskAdapter) getListAdapter()).notifyDataSetChanged();
+            Log.i("onProgressUpdate");
+        }
+
+        /**
+         * Runs on the UI thread after doInBackground(Params...). The specified
+         * result is the value returned by doInBackground(Params...). This method
+         * won't be invoked if the task was cancelled.
+         *
+         * @param downloadTask The result of the operation computed by
+         *                     doInBackground(Params...).
+         */
+        @Override
+        public void onSuccess(DownloadTask downloadTask) {
+            super.onSuccess(downloadTask);
+            Log.i("onSuccess()");
+        }
+
+        /**
+         * Applications should preferably override onCancelled(Object). This method
+         * is invoked by the default implementation of onCancelled(Object). Runs on
+         * the UI thread after cancel(boolean) is invoked and
+         * doInBackground(Object[]) has finished.
+         */
+        @Override
+        public void onCancelled() {
+            super.onCancelled();
+            Log.i("onCancelled()");
+        }
+
+        @Override
+        public void onError(Throwable thr) {
+            super.onError(thr);
+            Log.i("onError()");
+        }
+
+        /**
+         * Runs on the UI thread after doInBackground(Params...) when the task is
+         * finished or cancelled.
+         */
+        @Override
+        public void onFinish() {
+            super.onFinish();
+            Log.i("onFinish()");
+        }
+    };
+
 
     private AdapterView.OnItemClickListener mItemClickListener = new AdapterView.OnItemClickListener() {
         @Override
@@ -131,47 +240,10 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
             case DownloadStatus.STATUS_PENDING:
             case DownloadStatus.STATUS_FAILED:
             case DownloadStatus.STATUS_STOPPED:
-                DownloadManager.start(this, task, new DownloadListener<Integer, DownloadTask>() {
-                    @Override
-                    public void onStart() {
-                        super.onStart();
-                        Log.i("onStart");
-                    }
-
-                    @Override
-                    public void onProgressUpdate(Integer... values) {
-                        super.onProgressUpdate(values);
-                        ((DownloadTaskAdapter) getListAdapter()).notifyDataSetChanged();
-                        Log.i("onProgressUpdate");
-                    }
-
-                    @Override
-                    public void onSuccess(DownloadTask downloadTask) {
-                        super.onSuccess(downloadTask);
-                        Log.i("onSuccess");
-                    }
-
-                    @Override
-                    public void onCancelled() {
-                        super.onCancelled();
-                        Log.i("onCancelled");
-                    }
-
-                    @Override
-                    public void onError(Throwable thr) {
-                        super.onError(thr);
-                        Log.i("onError");
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        super.onFinish();
-                        Log.i("onFinish");
-                    }
-                });
+                downloadManager.start(task,listener);
                 break;
             case DownloadStatus.STATUS_RUNNING:
-                DownloadManager.stop(task);
+                downloadManager.stop(task,listener);
                 break;
             default:
                 break;
