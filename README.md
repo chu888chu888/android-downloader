@@ -6,4 +6,4 @@ a multi-thread downloader for android
 ##LIB
 
 ##APP
-[!preview.png](/docs/preview/preview.png)
+![preview.png](/docs/preview/preview.png "preview.png")
