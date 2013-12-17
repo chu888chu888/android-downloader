@@ -283,11 +283,36 @@ public class DownloadTask extends Object {
         }
 
         if (task != null) {
-            task.cancel(true);
+            task.cancel(false);
             task = null;
         }
 
         task = new AsycDownloadTask(listener,isOnlyGetHead);
         task.execute(this);
+    }
+
+    /**
+     * Stop the task
+     */
+    protected void stop(){
+        setStatus(DownloadStatus.STATUS_STOPPED);
+
+        if (task != null) {
+            task.cancel(false);
+            task = null;
+        }
+    }
+
+
+    /**
+     * Delete the task
+     */
+    protected void delete(){
+        setStatus(DownloadStatus.STATUS_DELETED);
+
+        if (task != null) {
+            task.cancel(false);
+            task = null;
+        }
     }
 }

@@ -152,7 +152,7 @@ public class DownloadManager {
                 Log.i("The Task is already Deleted.");
                 break;
             default:
-                task.setStatus(DownloadStatus.STATUS_DELETED);
+                task.delete();
                 OnResult(POST_MESSAGE.DELETE, task, listener, -1);
                 break;
         }
@@ -275,8 +275,8 @@ public class DownloadManager {
                 Log.i("The Task is already Stopped.");
                 break;
             case DownloadStatus.STATUS_RUNNING:
+                task.stop();
                 OnResult(POST_MESSAGE.STOP, task, listener, -1);
-                task.setStatus(DownloadStatus.STATUS_STOPPED);
                 break;
             default:
                 OnResult(POST_MESSAGE.ERROR, task, listener, DownloadException.DOWNLOAD_TASK_NOT_VALID);
