@@ -40,7 +40,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 
     // name of the database file for your application -- change to something
     // appropriate for your app
-    private static final String DATABASE_NAME = "snowdream-downloader.db";
+    private static final String DATABASE_NAME = "snowdream-android-downloader.db";
 
     // any time you make changes to your database objects, you may have to
     // increase the database version
