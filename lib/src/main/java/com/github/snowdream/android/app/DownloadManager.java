@@ -57,7 +57,7 @@ public class DownloadManager {
         ((Activity) context).runOnUiThread(new Runnable() {
 
             public void run() {
-                if (listener != null) {
+                if (listener == null) {
                     return;
                 }
 
@@ -118,6 +118,7 @@ public class DownloadManager {
                     task.start(context, listener, true);
                 }
             } else {
+                task.setDownloadTask(temptask);
                 OnResult(POST_MESSAGE.ADD, task, listener, -1);
                 Log.i("The Task is already stored in the sqlite.");
             }
