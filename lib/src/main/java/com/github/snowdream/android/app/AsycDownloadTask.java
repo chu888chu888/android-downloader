@@ -46,7 +46,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
      * http trunked
      */
     private static final int MODE_TRUNKED = 0x2;
-    private static final String STORE_PATH = "/mnt/snowdream/android-downloader/";
+    private static final String STORE_PATH = "/mnt/sdcard/snowdream/android-downloader/";
     private static final InternalHandler sHandler = new InternalHandler();
     /**
      * just get head detail message
@@ -135,7 +135,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
 
         DownloadTask task = tasks[0];
 
-        if (task == null || task.isValid()) {
+        if (task == null || !task.isValid()) {
             SendError(task, DownloadException.DOWNLOAD_TASK_NOT_VALID);
 
             Log.e("The task is not valid,or the url of the task is not valid.");
@@ -160,8 +160,6 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                 Log.i("The DownloadTask has already been downloaded.");
                 return task;
             }
-
-            task.setStatus(DownloadStatus.STATUS_RUNNING);
 
             String urlString = task.getUrl();
             String cookies = null;
@@ -297,6 +295,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                 Log.e("The directory of the file can not be created!");
                 return null;
             }
+            task.setStatus(DownloadStatus.STATUS_RUNNING);
 
             Log.i("DownloadTask " + task);
 
