@@ -43,6 +43,7 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
     private int mActivePosition = 0;
     private DownloadManager downloadManager = null;
     private List<DownloadTask> list = null;
+    private DownloadTaskAdapter adapter = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,17 +91,12 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
         downloadManager = new DownloadManager(this);
         list = new ArrayList<DownloadTask>();
 
-        DownloadTask task = new DownloadTask(this);
-        task.setUrl("http://192.168.30.131:8080/snowdream/HDExplorer_0.1.3_signed.apk");
-        task.setPath("/mnt/sdcard/HDExplorer_0.1.3_signed.apk");
-        downloadManager.add(task, listener);
-        Log.d("TAG", "test", new DownloadException("snowdream"));
-        Log.v("TAG", "test", new DownloadException("snowdream"));
-        Log.i("TAG", "test", new DownloadException("snowdream"));
-        Log.w("TAG", "test", new DownloadException("snowdream"));
-        Log.e("TAG", "test", new DownloadException("snowdream"));
-        DownloadTaskAdapter adapter = new DownloadTaskAdapter(this, list);
+        adapter = new DownloadTaskAdapter(this, list);
         setListAdapter(adapter);
+
+        DownloadTask task = new DownloadTask(this);
+        task.setUrl("https://hdexplorer.googlecode.com/files/HDExplorer_0.1.3_signed.apk");
+        downloadManager.add(task, listener);
     }
 
     private DownloadListener listener = new DownloadListener<Integer, DownloadTask>() {
@@ -116,6 +112,8 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
             super.onAdd(downloadTask);
             Log.i("onAdd()");
             list.add(downloadTask);
+            Log.i(""+downloadTask);
+            adapter.notifyDataSetChanged();
         }
 
         /**
@@ -240,6 +238,7 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
             case DownloadStatus.STATUS_PENDING:
             case DownloadStatus.STATUS_FAILED:
             case DownloadStatus.STATUS_STOPPED:
+            case DownloadStatus.STATUS_FINISHED:
                 downloadManager.start(task, listener);
                 break;
             case DownloadStatus.STATUS_RUNNING:
