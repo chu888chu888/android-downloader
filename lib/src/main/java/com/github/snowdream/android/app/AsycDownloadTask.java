@@ -296,6 +296,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                 return null;
             }
             task.setStatus(DownloadStatus.STATUS_RUNNING);
+            SaveDownloadTask(task, task.getStatus());
 
             Log.i("DownloadTask " + task);
 
