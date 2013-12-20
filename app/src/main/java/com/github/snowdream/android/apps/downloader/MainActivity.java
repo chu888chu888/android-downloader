@@ -48,8 +48,8 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.setPath("/mnt/sdcard/snowdream/log", "log", "log");
-        //Log.setPolicy(Log.LOG_ERROR_TO_FILE);
+        //Log.setPath("/mnt/sdcard/snowdream/log", "log", "log");
+        // Log.setPolicy(Log.LOG_ERROR_TO_FILE);
         Log.setPolicy(Log.LOG_ALL_TO_FILE);
 
         //setContentView(R.layout.activity_main);
