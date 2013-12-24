@@ -23,6 +23,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.github.snowdream.android.app.DownloadManager;
 import com.github.snowdream.android.app.DownloadTask;
 import com.github.snowdream.android.util.Log;
 
@@ -40,12 +42,20 @@ public class DownloadTaskAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return mItems.size();
+        int count = 0;
+        if (mItems != null) {
+            count = mItems.size();
+        }
+        return count;
     }
 
     @Override
     public Object getItem(int position) {
-        return mItems.get(position);
+        Object obj = null;
+        if (position >= 0 && position < getCount()) {
+            obj = mItems.get(position);
+        }
+        return obj;
     }
 
     @Override
@@ -91,5 +101,18 @@ public class DownloadTaskAdapter extends BaseAdapter {
         bar.setProgress(progress);
 
         return v;
+    }
+
+    public void destory() {
+        if (mContext == null) {
+            return;
+        }
+
+        DownloadManager downloadManager = new DownloadManager(mContext);
+        if (mItems != null) {
+            for (DownloadTask task : mItems) {
+                downloadManager.stop(task, null);
+            }
+        }
     }
 }

@@ -99,6 +99,12 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
         downloadManager.add(task, listener);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        adapter.destory();
+    }
+
     private DownloadListener listener = new DownloadListener<Integer, DownloadTask>() {
         /**
          * The download task has been added to the sqlite.
