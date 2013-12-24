@@ -24,7 +24,7 @@ apply from: '../config/maven_push.gradle'
 
 dependencies {
     compile 'com.github.snowdream.android.util.concurrent:multithread:0.0.6'
-    compile 'com.github.snowdream.android.util:log:1.0.3-SNAPSHOT'
+    compile 'com.github.snowdream.android.util:log:1.0.3'
     compile 'com.j256.ormlite:ormlite-core:4.47'
     compile 'com.j256.ormlite:ormlite-android:4.47'
     compile 'org.apache.commons:commons-lang3:3.1'

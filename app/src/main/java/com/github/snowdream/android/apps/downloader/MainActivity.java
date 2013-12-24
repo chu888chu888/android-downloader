@@ -101,8 +101,8 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         adapter.destory();
+        super.onDestroy();
     }
 
     private DownloadListener listener = new DownloadListener<Integer, DownloadTask>() {
