@@ -284,7 +284,6 @@ public class DownloadTask extends Object {
 
         if (task != null) {
             task.cancel(false);
-            task = null;
         }
 
         task = new AsycDownloadTask(listener,isOnlyGetHead);
@@ -299,7 +298,6 @@ public class DownloadTask extends Object {
 
         if (task != null) {
             task.cancel(false);
-            task = null;
         }
     }
 
@@ -312,7 +310,6 @@ public class DownloadTask extends Object {
 
         if (task != null) {
             task.cancel(false);
-            task = null;
         }
     }
 }
