@@ -22,7 +22,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.6.3'
+        classpath 'com.android.tools.build:gradle:0.7.0+'
     }
 }
 
@@ -30,17 +30,22 @@ allprojects {
     version = POM_VERSION
 
     repositories {
-        maven {
-            url "file:///home/snowdream/workspace/git/mvn-repo/releases/"
-        }
-        maven {
-            url "file:///home/snowdream/workspace/git/mvn-repo/snapshots/"
-        }
         mavenLocal()
         mavenCentral()
+        maven { url "http://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url "file:///home/snowdream/workspace/git/mvn-repo/releases/" }
+        maven { url "file:///home/snowdream/workspace/git/mvn-repo/snapshots/" }
+        maven { url "http://snowdream.github.io/mvn-repo/releases/" }
+        maven { url "http://snowdream.github.io/mvn-repo/snapshots/" }
     }
 
     tasks.withType(JavaCompile) {
         options.encoding = "UTF-8"
     }
 }
+
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.9'
+}
+

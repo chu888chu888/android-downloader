@@ -109,7 +109,7 @@ afterEvaluate { project ->
 
     task androidJavadocsJar(type: Jar) {
         classifier = 'javadoc'
-        from generateReleaseJavadoc.destinationDir
+        from "generateReleaseJavadoc.destinationDir"
     }
 
     task androidSourcesJar(type: Jar) {
@@ -166,3 +166,4 @@ private configurePOM(def pom) {
         }
     }
 }
+
