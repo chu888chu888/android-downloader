@@ -46,7 +46,7 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
      * http trunked
      */
     private static final int MODE_TRUNKED = 0x2;
-    private static final String STORE_PATH = "/mnt/sdcard/snowdream/android-downloader/";
+    private static final String STORE_PATH = "/mnt/sdcard/snowdream/android/downloader/";
     private static final InternalHandler sHandler = new InternalHandler();
     /**
      * just get head detail message
