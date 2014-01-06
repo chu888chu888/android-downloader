@@ -95,7 +95,7 @@ public class MainActivity extends ListActivity implements MenuAdapter.MenuListen
         setListAdapter(adapter);
 
         DownloadTask task = new DownloadTask(this);
-        task.setUrl("https://hdexplorer.googlecode.com/files/HDExplorer_0.1.3_signed.apk");
+        task.setUrl("https://github.com/snowdream/android-autoupdate/raw/master/docs/test/android-autoupdater-v0.0.2-release.apk");
         downloadManager.add(task, listener);
     }
 
