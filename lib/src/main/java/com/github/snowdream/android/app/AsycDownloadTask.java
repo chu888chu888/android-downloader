@@ -21,6 +21,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
+
 import com.github.snowdream.android.app.dao.ISql;
 import com.github.snowdream.android.app.dao.ISqlImpl;
 import com.github.snowdream.android.util.Log;
@@ -77,8 +78,8 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
      * @param task task
      */
     private void OnAdd(DownloadTask task) {
-        if (listener != null && listener instanceof  DownloadListener) {
-            ((DownloadListener)listener).onAdd(task);
+        if (listener != null && listener instanceof DownloadListener) {
+            ((DownloadListener) listener).onAdd(task);
         }
     }
 
@@ -255,11 +256,10 @@ public class AsycDownloadTask extends AsyncTask<DownloadTask, Integer, DownloadT
                     String disposition = connection.getHeaderField("Content-Disposition");
                     if (disposition != null) {
                         // extracts file name from header field
-                        int index = disposition.indexOf("filename=");
-                        if (index > 0) {
-                            filename = disposition.substring(index + 10,
-                                    disposition.length() - 1);
-                        }
+                        final String FILENAME = "filename=";
+                        final int startIdx = disposition.indexOf(FILENAME);
+                        final int endIdx = disposition.indexOf(';', startIdx);
+                        filename = disposition.substring(startIdx + FILENAME.length(), endIdx > 0 ? endIdx : disposition.length());
                     } else {
                         // extracts file name from URL
                         filename = urlString.substring(urlString.lastIndexOf("/") + 1,
