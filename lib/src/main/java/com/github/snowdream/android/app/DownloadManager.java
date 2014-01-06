@@ -275,6 +275,15 @@ public class DownloadManager {
                 Log.i("The Task is already Stopped.");
                 break;
             case DownloadStatus.STATUS_RUNNING:
+                task.setStatus(DownloadStatus.STATUS_STOPPED);
+
+                ISql iSql = new ISqlImpl(context);
+                try {
+                    iSql.updateDownloadTask(task);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
                 task.stop();
                 OnResult(POST_MESSAGE.STOP, task, listener, -1);
                 break;
