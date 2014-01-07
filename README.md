@@ -147,7 +147,7 @@ private DownloadListener listener = new DownloadListener<Integer, DownloadTask>(
 };
 ```
 
-2.advance
+2.advance  
 You can set more properties of the DownloadTask.
 ```java
 DownloadTask task = new DownloadTask(this);
